@@ -152,12 +152,12 @@ function CoreView(app, domid, theDelegate) {
         });
 
         mouse.forEach(function(evname) {
-            this.container[0].addEventListener(evname, function(ev) {
+            self.container[0].addEventListener(evname, function(ev) {
                 callMyEvent(ev, evname);
             },false);
         });
         keyboard.forEach(function(evname) {
-            this.container[0].addEventListener(evname, function(ev) {
+            self.container[0].addEventListener(evname, function(ev) {
                 callMyEvent(ev, evname);
             },false);
         });
