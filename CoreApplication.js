@@ -120,7 +120,7 @@ CoreApplication.prototype.initModels = function () {
         });
     }
 
-    var pn = this.modelReg.getOwnPropertyNames();
+    var pn = Object.getOwnPropertyNames(this.modelReg);
     for (i = 0; i < pn.length; i++) {
         this.models[pn[i]] = new this.modelReg[pn[i]](this);
     }

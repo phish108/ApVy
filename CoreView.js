@@ -267,8 +267,8 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
                 }
             }
         });
-        if (this.models.getOwnPropertyNames().length) {
-            var fmn = this.models.getOwnPropertyNames()[0];
+        if (Object.getOwnPropertyNames(this.models).length) {
+            var fmn = Object.getOwnPropertyNames(this.models)[0];
             Object.defineProperties(delegateBase, {
                 'model': {'get': function () { return self.models[fmn]; }}
             });
