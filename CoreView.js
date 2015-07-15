@@ -110,44 +110,46 @@ function CoreView(app, domid, theDelegate) {
         var bMove = false;
 
         touch.forEach(function (evname) {
-            evname = evname.toLowerCase();
-            switch (evname) {
-                case 'move':
-                    jester(self.container[0]).start(function (e,t) {
-                        callMyEvent(e, 'startMove', {touches: t});
-                        bMove = true;
-                    });
-                    jester(self.container[0]).move(function (e,t) {
-                        if (self.active && bMove) {
-                            callMyEvent(e, 'duringMove', {touches: t});
-                        }
-                    });
-                    jester(self.container[0]).end(function (e,t) {
-                        if (self.active && bMove) {
-                            callMyEvent(e, 'endMove', {touches: t});
-                            bMove = false;
-                        }
-                    });
-                    break;
-                case 'pinch':
-                    jester(self.container[0]).pinchwiden(function (e,t) {
-                        callMyEvent(e, 'pinch', {touches: t, direction: 1});
-                    });
-                    jester(self.container[0]).pinchnarrow(function (e,t) {
-                        callMyEvent(e, 'pinch', {touches: t, direction: -1});
-                    });
-                    break;
-                default:
-                    jester(self.container[0]).bind(evname, function (e,t) {
-                        if (e.detail && e.detail.hasOwnProperty('direction')) {
-                             callMyEvent(e, evname, {touches: t,
-                                                    direction: e.detail.direction ? 1 : -1});
-                        }
-                        else {
-                            callMyEvent(e, evname, {touches: t});
-                        }
-                    });
-                    break;
+            if (evname && evname.length) {
+                evname = evname.toLowerCase();
+                switch (evname) {
+                    case 'move':
+                        jester(self.container[0]).start(function (e,t) {
+                            callMyEvent(e, 'startMove', {touches: t});
+                            bMove = true;
+                        });
+                        jester(self.container[0]).move(function (e,t) {
+                            if (self.active && bMove) {
+                                callMyEvent(e, 'duringMove', {touches: t});
+                            }
+                        });
+                        jester(self.container[0]).end(function (e,t) {
+                            if (self.active && bMove) {
+                                callMyEvent(e, 'endMove', {touches: t});
+                                bMove = false;
+                            }
+                        });
+                        break;
+                    case 'pinch':
+                        jester(self.container[0]).pinchwiden(function (e,t) {
+                            callMyEvent(e, 'pinch', {touches: t, direction: 1});
+                        });
+                        jester(self.container[0]).pinchnarrow(function (e,t) {
+                            callMyEvent(e, 'pinch', {touches: t, direction: -1});
+                        });
+                        break;
+                    default:
+                        jester(self.container[0]).bind(evname, function (e,t) {
+                            if (e.detail && e.detail.hasOwnProperty('direction')) {
+                                 callMyEvent(e, evname, {touches: t,
+                                                        direction: e.detail.direction ? 1 : -1});
+                            }
+                            else {
+                                callMyEvent(e, evname, {touches: t});
+                            }
+                        });
+                        break;
+                }
             }
         });
 
@@ -256,7 +258,9 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
     if (touch) {
         touch = touch.split(" ");
         touch.forEach(function (evname) {
-            delegateBase[evname] = noop;
+            if (evname && evname.length) {
+                delegateBase[evname] = noop;
+            }
         });
     }
 
