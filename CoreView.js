@@ -251,14 +251,14 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
     delegateBase.update     = noop;
     delegateBase.prepare    = noop;
     delegateBase.cleanup    = noop;
-    delegateBase.tap        = noop;
-    delegateBase.click      = noop;
-    delegateBase.blur       = noop;
-    delegateBase.focus      = noop;
-    delegateBase.pinch      = noop;
-    delegateBase.startMove  = noop;
-    delegateBase.duringMove = noop;
-    delegateBase.endMove    = noop;
+
+    var touch = this.container[0].dataset.touch;
+    if (touch) {
+        touch = touch.split(" ");
+        touch.forEach(function (evname) {
+            delegateBase[evname] = noop;
+        });
+    }
 
     // subclass the delegate.
     theDelegate.prototype = Object.create(delegateBase);
