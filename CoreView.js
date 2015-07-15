@@ -218,7 +218,8 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
                                            'content':   {get: function () {return self.content;}},
                                            'template':  {get: function () {return self.template;}},
                                            'active':    {get: function () {return self.active;}},
-                                           'data':      {get: function () {return self.viewData;}}
+                                           'data':      {get: function () {return self.viewData;}},
+                                           'models':    {get: function () {return self.models;}}
                                           });
 
     if (typeof delegateName === "string" && delegateName.length) {
@@ -253,6 +254,27 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
     delegateBase.update     = noop;
     delegateBase.prepare    = noop;
     delegateBase.cleanup    = noop;
+
+    var models = this.container[0].dataset.model;
+    if (models && models.length) {
+        models = models.split(' ');
+        this.models = {};
+        models.forEach(function (mn) {
+            if (mn && mn.length) {
+                mn = mn.replace('Model', '').toLowerCase();
+                if (this.app.models.hasOwnProperty(mn)) {
+                    this.models[mn] = this.app.models[mn];
+                }
+            }
+        });
+        if (this.models.getOwnPropertyNames().length) {
+            var fmn = this.models.getOwnPropertyNames()[0];
+            Object.defineProperties(delegateBase, {
+                'model': {'get': function () { return self.models[fmn]; }}
+            });
+        }
+    }
+
 
     var touch = this.container[0].dataset.touch;
     if (touch) {

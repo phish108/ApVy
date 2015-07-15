@@ -32,7 +32,7 @@ CoreApplication.start = function (controller) {
     function CoreApplicationHelper() {
         CoreApplication.call(this);
         controller.call(this);
-    };
+    }
 
     CoreClass.extend(controller, CoreApplication);
     CoreClass.extend(CoreApplicationHelper, controller);
@@ -54,7 +54,7 @@ CoreApplication.start = function (controller) {
 };
 
 CoreApplication.prototype.setReadOnly = function (name, value) {
-    if (!(name in this) && !this[name]) {
+    if (!this.hasOwnProperty(name) && !this[name]) {
         var tmpVal = value;
         Object.defineProperty(this, name, {get: function () {return tmpVal;}});
     }
@@ -87,26 +87,43 @@ CoreApplication.prototype.initTemplates = function () {
 };
 
 CoreApplication.prototype.initModels = function () {
-    var meta = document.getElementsByTagName('META');
-    for (var i = 0; i < meta.length; i++) {
-        if (meta[i].getAttribute('name') === 'app:models') {
-            var rs = meta[i].content;
-            rs = rs.replace(/\s+/g, '');
-            var r = rs.split(/\,/);
-            this.modelReg = {};
-            for (var j = 0; j < r.length; j++) {
-                if (r[j] in window && typeof window[r[j]] === 'function') {
-                    this.modelReg[r[j]] = window[r[j]];
+    var i, ml, meta, rs, models = [];
+
+    // new style
+    $('[data-model]').each(function () {
+         ml = this.dataset.model;
+        if (ml && ml.length) {
+            ml.split(" ").forEach(function (mName) {
+                if (mName && mName.length && models.indexOf(mName) < 0) {
+                    models.push(mName);
                 }
+            });
+        }
+    });
+
+    if (!models.length) {
+        meta = document.getElementsByTagName('META');
+        for (i = 0; i < meta.length; i++) {
+            if (meta[i].getAttribute('name') === 'app:models') {
+                rs = meta[i].content;
+                rs = rs.replace(/\s+/g, '');
+                models = rs.split(/\,/);
             }
-            break; // we accept only one data tag
         }
     }
-
-    for (var k in this.modelReg) {
-        this.models[k.replace('Model', '').toLowerCase()] = new this.modelReg[k](this);
+    this.modelReg = {};
+    if (models.length) {
+        models.forEach(function(m) {
+            if (typeof window[m] === 'function') {
+                this.modelReg[m.replace('Model', '').toLowerCase()] = window[m];
+            }
+        });
     }
 
+    var pn = this.modelReg.getOwnPropertyNames();
+    for (i = 0; i < pn.length; i++) {
+        this.models[pn[i]] = new this.modelReg[pn[i]](this);
+    }
 };
 
 CoreApplication.prototype.initViews = function () {
@@ -115,10 +132,8 @@ CoreApplication.prototype.initViews = function () {
         var tagid = this.id;
         var className = this.dataset.view;
 
-        if (className) {
-            if((className in window) && (typeof window[className] === 'function')) {
-                self.views[tagid] = new CoreView(self, tagid, window[className]);
-            }
+        if (className && typeof window[className] === 'function') {
+            self.views[tagid] = new CoreView(self, tagid, window[className]);
         }
     }); // end each()
 };
@@ -157,11 +172,12 @@ CoreApplication.prototype.openFirstView = function() {
         this.views[this.viewId].open();
     }
 };
+
 CoreApplication.prototype.initialize = function () {};
 CoreApplication.prototype.bindEvents = function () {};
 
     // register the class to the target object
-    if (!('CoreApplication' in a)) {
+    if (typeof a.CoreApplication !== 'function') {
         a.CoreApplication = CoreApplication;
     }
 })(window);
