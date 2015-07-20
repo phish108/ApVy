@@ -1,4 +1,5 @@
 /*jslint white: true, vars: true, sloppy: true, devel: true, plusplus: true, browser: true */
+/*global CoreView, CoreClass*/
 
 (function (a) {
 
@@ -6,15 +7,17 @@
     var $ = a.$;
     var TmplFactory = a.TemplateFactory;
 
-function CoreApplication()   {
-    this.views = {};
-    this.viewReg = {};
-    this.models = {};
-    this.modelReg = {};
-    this.sourceView = null;
-    this.sourceTrace = [];
-    this.viewId = "";
-}
+    function noop() { return; }
+
+    function CoreApplication()   {
+        this.views = {};
+        this.viewReg = {};
+        this.models = {};
+        this.modelReg = {};
+        this.sourceView = null;
+        this.sourceTrace = [];
+        this.viewId = "";
+    }
 
 /**
  * @static @method start(controller)
@@ -117,7 +120,7 @@ CoreApplication.prototype.initModels = function () {
             if (typeof window[m] === 'function') {
                 this.modelReg[m.replace('Model', '').toLowerCase()] = window[m];
             }
-        });
+        }, this);
     }
 
     var pn = Object.getOwnPropertyNames(this.modelReg);
@@ -173,11 +176,11 @@ CoreApplication.prototype.openFirstView = function() {
     }
 };
 
-CoreApplication.prototype.initialize = function () {};
-CoreApplication.prototype.bindEvents = function () {};
+CoreApplication.prototype.initialize = noop;
+CoreApplication.prototype.bindEvents = noop;
 
     // register the class to the target object
     if (typeof a.CoreApplication !== 'function') {
         a.CoreApplication = CoreApplication;
     }
-})(window);
+}(window));

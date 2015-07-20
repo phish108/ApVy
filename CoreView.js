@@ -1,4 +1,4 @@
-/*jslint white: true, vars: true, sloppy: true, devel: true, plusplus: true, browser: true */
+/*jslint white: true, vars: true, sloppy: true, devel: true, plusplus: true, browser: true, unparam: true*/
 
 // instantiate as following:
 //     myClass.prototype = Object.create(CoreView.prototype);
@@ -11,7 +11,7 @@
     var jester = a.jester;
     var $ = a.$;
 
-    function noop() {}
+    function noop() { return; }
 
     function findIDEl(el){
         while (el.parentElement) {
@@ -206,10 +206,10 @@ CoreView.prototype.mapDelegate = function (delegateOrigName, delegateName) {
     }
 };
 
-CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
+CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
     var self = this;
 
-    var delegateProto = theDelegate.prototype;
+    var delegateProto = TheDelegate.prototype;
     var delegateBase  = {};
 
     // hook important information into the delegate
@@ -287,7 +287,7 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
     }
 
     // subclass the delegate.
-    theDelegate.prototype = Object.create(delegateBase);
+    TheDelegate.prototype = Object.create(delegateBase);
 
     // roll back the delegate functions (and overload the functions where required)
     Object.getOwnPropertyNames(delegateProto).forEach(function (pname) {
@@ -309,7 +309,7 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
                 // don't override core view internals
                 break;
             default:
-                Object.defineProperty(theDelegate.prototype,
+                Object.defineProperty(TheDelegate.prototype,
                                       pname,
                                       Object.getOwnPropertyDescriptor(delegateProto, pname));
                 break;
@@ -319,12 +319,12 @@ CoreView.prototype.initDelegate = function (theDelegate, delegateName, opts) {
     if (typeof delegateName === "string" && delegateName.length) {
         if (!(self.widgets.hasOwnProperty(delegateName))) {
             // initialize the same widget name only once
-            self.widgets[delegateName] = new theDelegate(opts || {});
+            self.widgets[delegateName] = new TheDelegate(opts || {});
         }
     }
     else {
         self.widgets = {};
-        self.delegate = new theDelegate();
+        self.delegate = new TheDelegate();
     }
 };
 
@@ -403,4 +403,4 @@ CoreView.prototype.close = function () {
     if (!(a.hasOwnProperty('CoreView'))) {
         a.CoreView = CoreView;
     }
-})(window);
+}(window));
