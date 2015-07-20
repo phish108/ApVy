@@ -266,7 +266,7 @@ CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
                     this.models[mn] = this.app.models[mn];
                 }
             }
-        });
+        }, this);
         if (Object.getOwnPropertyNames(this.models).length) {
             var fmn = Object.getOwnPropertyNames(this.models)[0];
             Object.defineProperties(delegateBase, {
