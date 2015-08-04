@@ -165,6 +165,16 @@ CoreApplication.prototype.changeView = function chView(viewname, viewData) {
     }
 };
 
+CoreApplication.prototype.deferredChangeView = function dchView(eventname, viewname, viewData) {
+    var self = this;
+    function defer() {
+        self.changeView(viewname, viewData);
+        $(document).unbind(eventname, defer);
+    }
+
+    $(document).bind(eventname, defer);
+};
+
 CoreApplication.prototype.reopenView = function (viewData) {
     this.views[this.viewId].close();
     this.views[this.viewId].open(viewData);
