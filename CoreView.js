@@ -41,7 +41,7 @@ function CoreView(app, domid, theDelegate) {
             if (id && typeof d[name + "_"+id] === 'function') {
                 d[name+"_"+id](ev, id, data);
             }
-            else {
+            else if (typeof d[name] === 'function') {
                 d[name](ev, id, data);
             }
 
@@ -50,7 +50,7 @@ function CoreView(app, domid, theDelegate) {
                 if (id && typeof d[name+"_"+id] === 'function') {
                     d[name+"_"+id](ev, id, data);
                 }
-                else {
+                else if (typeof d[name] === 'function') {
                     d[name](ev, id, data);
                 }
             }
