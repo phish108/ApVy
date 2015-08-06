@@ -73,6 +73,9 @@ function CoreView(app, domid, theDelegate) {
             if (!this.template) {
                 this.template = this.app.templates.getTargetTemplate(domid);
             }
+            if (!this.template) { // still no template make the container a component so we can reuse all IDs.
+                this.template = this.app.templates.makeComponent(this.container[0]);
+            }
 
             this.isStatic = (this.content.hasClass('static') || this.content.find('container').length);
             this.isDynamic = !this.isStatic;
