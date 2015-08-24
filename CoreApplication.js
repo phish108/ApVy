@@ -145,24 +145,36 @@ CoreApplication.prototype.isActiveView = function (viewObject) {
     return (this.views[this.viewId] === viewObject);
 };
 
-CoreApplication.prototype.changeView = function chView(viewname, viewData) {
-    if (viewname &&
-        typeof viewname === 'string' &&
-        this.views[viewname] &&
-        this.viewId !== viewname) {
-        if (viewname === this.sourceView) {
-            this.sourceView = this.sourceTrace.pop();
+CoreApplication.prototype.changeView = function chView(viewname, eventname) {
+    function defer() {
+        if (viewname &&
+            typeof viewname === 'string' &&
+            this.views[viewname] &&
+            this.viewId !== viewname) {
+            if (viewname === this.sourceView) {
+                this.sourceView = this.sourceTrace.pop();
+            }
+            else {
+                this.sourceTrace.push(this.sourceView);
+                this.sourceView = this.viewId; // this is used for back operations in CoreView
+            }
+            if (this.viewId && this.views[this.viewId]) {
+                this.views[this.viewId].close();
+            }
+            this.viewId = viewname;
+            this.views[this.viewId].open();
         }
-        else {
-            this.sourceTrace.push(this.sourceView);
-            this.sourceView = this.viewId; // this is used for back operations in CoreView
-        }
-        if (this.viewId && this.views[this.viewId]) {
-            this.views[this.viewId].close();
-        }
-        this.viewId = viewname;
-        this.views[this.viewId].open(viewData);
+        // won't do any harm
+        $(document).unbind(eventname, defer);
     }
+
+    if (!eventname) {
+        defer();
+    }
+    else {
+        $(document).bind(eventname, defer);
+    }
+
 };
 
 CoreApplication.prototype.deferredChangeView = function dchView(eventname, viewname, viewData) {
