@@ -145,7 +145,7 @@ CoreApplication.prototype.isActiveView = function (viewObject) {
     return (this.views[this.viewId] === viewObject);
 };
 
-CoreApplication.prototype.changeView = function chView(viewname, eventname) {
+CoreApplication.prototype.changeView = function chView(viewname, eventname, viewdata) {
     var self = this;
 
     function defer() {
@@ -164,7 +164,7 @@ CoreApplication.prototype.changeView = function chView(viewname, eventname) {
                 self.views[self.viewId].close();
             }
             self.viewId = viewname;
-            self.views[self.viewId].open();
+            self.views[self.viewId].open(viewdata);
         }
         // won't do any harm
         $(document).unbind(eventname, defer);
@@ -177,16 +177,6 @@ CoreApplication.prototype.changeView = function chView(viewname, eventname) {
         $(document).bind(eventname, defer);
     }
 
-};
-
-CoreApplication.prototype.deferredChangeView = function dchView(eventname, viewname, viewData) {
-    var self = this;
-    function defer() {
-        self.changeView(viewname, viewData);
-        $(document).unbind(eventname, defer);
-    }
-
-    $(document).bind(eventname, defer);
 };
 
 CoreApplication.prototype.reopenView = function (viewData) {
