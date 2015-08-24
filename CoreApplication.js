@@ -146,23 +146,25 @@ CoreApplication.prototype.isActiveView = function (viewObject) {
 };
 
 CoreApplication.prototype.changeView = function chView(viewname, eventname) {
+    var self = this;
+
     function defer() {
         if (viewname &&
             typeof viewname === 'string' &&
-            this.views[viewname] &&
-            this.viewId !== viewname) {
-            if (viewname === this.sourceView) {
-                this.sourceView = this.sourceTrace.pop();
+            self.views[viewname] &&
+            self.viewId !== viewname) {
+            if (viewname === self.sourceView) {
+                self.sourceView = self.sourceTrace.pop();
             }
             else {
-                this.sourceTrace.push(this.sourceView);
-                this.sourceView = this.viewId; // this is used for back operations in CoreView
+                self.sourceTrace.push(this.sourceView);
+                self.sourceView = this.viewId; // this is used for back operations in CoreView
             }
-            if (this.viewId && this.views[this.viewId]) {
-                this.views[this.viewId].close();
+            if (self.viewId && self.views[self.viewId]) {
+                self.views[self.viewId].close();
             }
-            this.viewId = viewname;
-            this.views[this.viewId].open();
+            self.viewId = viewname;
+            self.views[self.viewId].open();
         }
         // won't do any harm
         $(document).unbind(eventname, defer);
