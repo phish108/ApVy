@@ -368,7 +368,9 @@ CoreView.prototype.refresh = function () {
             this.updateDelegate.update();
         }
         // allow the view to still do updates to itself
-        this.delegate.update();
+        if (this.delegate) {
+            this.delegate.update();
+        }
     }
 };
 
@@ -402,7 +404,9 @@ CoreView.prototype.close = function () {
         this.updateDelegate.cleanup();
         this.updateDelegate = null;
     }
-    this.delegate.cleanup();
+    if (this.delegate) {
+        this.delegate.cleanup();
+    }
 };
 
     if (!(a.hasOwnProperty('CoreView'))) {
