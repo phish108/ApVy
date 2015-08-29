@@ -23,7 +23,7 @@
         return undefined;
     }
 
-function CoreView(app, domid, theDelegate) {
+function CoreView(app, domid, delegate) {
     var self = this;
 
     this.app        = app;
@@ -81,7 +81,9 @@ function CoreView(app, domid, theDelegate) {
             this.isDynamic = !this.isStatic;
         }
 
-        this.initDelegate(theDelegate);
+        if (delegate && typeof window[delegate] === 'function') {
+            this.initDelegate(window[delegate]);
+        }
 
         var touch = [], mouse = [], keyboard = [];
 

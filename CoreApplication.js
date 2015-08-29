@@ -132,12 +132,10 @@ CoreApplication.prototype.initModels = function () {
 CoreApplication.prototype.initViews = function () {
     var self = this;
     $('[data-view]').each(function () {
-        var tagid = this.id;
-        var className = this.dataset.view;
+        var tagid     = this.id,
+            className = this.dataset.view;
 
-        if (className && typeof window[className] === 'function') {
-            self.views[tagid] = new CoreView(self, tagid, window[className]);
-        }
+        self.views[tagid] = new CoreView(self, tagid, className);
     }); // end each()
 };
 
@@ -153,8 +151,9 @@ CoreApplication.prototype.changeView = function chView(viewname, eventname, view
             typeof viewname === 'string' &&
             self.views[viewname] &&
             self.viewId !== viewname) {
-            if (viewname === self.sourceView) {
-                self.sourceView = self.sourceTrace.pop();
+                if (viewname === self.sourceView) {
+                    self.sourceView = self.sourceTrace.pop();
+                }
             }
             else {
                 self.sourceTrace.push(this.sourceView);
