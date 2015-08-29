@@ -151,17 +151,16 @@ CoreApplication.prototype.changeView = function chView(viewname, eventname, view
             typeof viewname === 'string' &&
             self.views[viewname] &&
             self.viewId !== viewname) {
-                if (viewname === self.sourceView) {
-                    self.sourceView = self.sourceTrace.pop();
-                }
+            if (viewname === self.sourceView) {
+                self.sourceView = self.sourceTrace.pop();
             }
             else {
                 self.sourceTrace.push(this.sourceView);
                 self.sourceView = this.viewId; // this is used for back operations in CoreView
             }
             if (self.viewId && self.views[self.viewId]) {
-                self.views[self.viewId].close();
-            }
+                    self.views[self.viewId].close();
+                }
             self.viewId = viewname;
             self.views[self.viewId].open(viewdata);
         }
