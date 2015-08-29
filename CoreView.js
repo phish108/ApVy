@@ -378,8 +378,9 @@ CoreView.prototype.open = function (viewData) {
     this.viewData = viewData || {};
 
     this.isVisible = true;
-
-    this.delegate.prepare();
+    if (this.delegate) {
+        this.delegate.prepare();
+    }
 
     if (this.isVisible && this.updateDelegate) {
         this.updateDelegate.prepare();
