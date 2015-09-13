@@ -84,9 +84,9 @@ CoreApplication.prototype.registerModel = function (fn){
 
 CoreApplication.prototype.initTemplates = function () {
     this.templates = new TmplFactory();
-    if (!this.templates) {
-        console.log('templates failed');
-    }
+//    if (!this.templates) {
+//        console.log('templates failed');
+//    }
 };
 
 CoreApplication.prototype.initModels = function () {

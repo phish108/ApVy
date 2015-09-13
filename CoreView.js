@@ -105,7 +105,6 @@ function CoreView(app, domid, delegate) {
 
             if (this.container[0].dataset.keyboard) {
                 keyboard = this.container[0].dataset.keyboard.split(' ');
-                // console.log("keyboard " + keyboard.join(','));
             }
         }
 
@@ -173,7 +172,6 @@ function CoreView(app, domid, delegate) {
             var seTouch = this.dataset.touch.split(' ');
 
             if (seTouch.indexOf('tap') >= 0) {
-                console.log("register tap on container " + this.id);
                 jester(this).tap(callMyTap);
             }
         });
