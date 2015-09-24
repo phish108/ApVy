@@ -391,6 +391,14 @@ CoreView.prototype.open = function (viewData) {
     // again if changeView is called during refresh(), the view must not be opened
     if (this.isVisible && this.container) {
         this.container.addClass('active');
+        // ask the delegate to complete the refresh
+        if (this.delegate && this.delegate.activateUI) {
+            this.delegate.activateUI();
+        }
+        if (this.updateDelegate && this.updateDelegate.activateUI) {
+            this.updateDelegate.activateUI();
+        }
+        // ask the updateDelegate the same
     }
 };
 
