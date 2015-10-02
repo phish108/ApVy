@@ -162,6 +162,7 @@ function CoreView(app, domid, delegate) {
                 callMyEvent(ev, evname);
             },false);
         });
+
         keyboard.forEach(function(evname) {
             self.container[0].addEventListener(evname, function(ev) {
                 callMyEvent(ev, evname);
@@ -332,8 +333,8 @@ CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
 };
 
 CoreView.prototype.back = function () {
-    if (this.app && this.app.changeView) {
-        this.app.changeView(this.app.sourceView);
+    if (this.app && this.app.rollbackView) {
+        this.app.rollbackView();
     }
 };
 

@@ -14,7 +14,6 @@
         this.viewReg = {};
         this.models = {};
         this.modelReg = {};
-        this.sourceView = null;
         this.sourceTrace = [];
         this.viewId = "";
     }
@@ -145,22 +144,28 @@ CoreApplication.prototype.isActiveView = function (viewObject) {
 
 CoreApplication.prototype.changeView = function chView(viewname, eventname, viewdata) {
     var self = this;
+    var lastView = this.sourceTrace[this.sourceTrace.length - 1];
 
     function defer() {
         if (viewname &&
             typeof viewname === 'string' &&
             self.views[viewname] &&
             self.viewId !== viewname) {
-            if (viewname === self.sourceView) {
-                self.sourceView = self.sourceTrace.pop();
+            // only change if there really is a change.
+
+            if (viewname === lastView) {
+                // implicit rollback
+                self.sourceTrace.pop();
             }
             else {
-                self.sourceTrace.push(this.sourceView);
-                self.sourceView = this.viewId; // this is used for back operations in CoreView
+                // not reopen
+                self.sourceTrace.push(self.viewId);
             }
+
             if (self.viewId && self.views[self.viewId]) {
-                    self.views[self.viewId].close();
-                }
+                self.views[self.viewId].close();
+            }
+
             self.viewId = viewname;
             self.views[self.viewId].open(viewdata);
         }
@@ -174,7 +179,6 @@ CoreApplication.prototype.changeView = function chView(viewname, eventname, view
     else {
         $(document).bind(eventname, defer);
     }
-
 };
 
 CoreApplication.prototype.reopenView = function (viewData) {
@@ -182,10 +186,28 @@ CoreApplication.prototype.reopenView = function (viewData) {
     this.views[this.viewId].open(viewData);
 };
 
+/**
+ * This function implements back button.
+ */
+CoreApplication.prototype.rollbackView = function () {
+    var view = this.previousView();
+    // only rollback if there is actually something to rollback;
+    if (view && view.length) {
+        this.changeView(view);
+    }
+};
+
 CoreApplication.prototype.openFirstView = function() {
     if (this.viewId && this.viewId.length) {
         this.views[this.viewId].open();
     }
+};
+
+/**
+ * apps may override this function with their own logic.
+ */
+CoreApplication.prototype.previousView = function () {
+    return this.sourceTrace.pop();
 };
 
 CoreApplication.prototype.initialize = noop;
