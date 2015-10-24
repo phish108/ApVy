@@ -262,6 +262,10 @@ CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
         };
     }
 
+    delegateBase.useTemplate = function (tmplName) {
+        self.useTemplate(tmplName);
+    }
+
     delegateBase.update     = noop;
     delegateBase.prepare    = noop;
     delegateBase.cleanup    = noop;
