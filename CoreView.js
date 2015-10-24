@@ -210,6 +210,13 @@ CoreView.prototype.mapDelegate = function (delegateOrigName, delegateName) {
     }
 };
 
+CoreView.prototype.useTemplate = function (templateName) {
+    var tmpl = this.app.templates.getTemplate(templateName);
+    if (tmpl) {
+        this.activeTemplate = tmpl;
+    }
+};
+
 CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
     var self = this;
 
@@ -220,7 +227,7 @@ CoreView.prototype.initDelegate = function (TheDelegate, delegateName, opts) {
     Object.defineProperties(delegateBase, {'app':       {get: function () {return self.app;}},
                                            'container': {get: function () {return self.container;}},
                                            'content':   {get: function () {return self.content;}},
-                                           'template':  {get: function () {return self.template;}},
+                                           'template':  {get: function () {return self.activeTemplate ? self.activeTemplate : self.template;}},
                                            'active':    {get: function () {return self.active;}},
                                            'data':      {get: function () {return self.viewData;}},
                                            'models':    {get: function () {return self.models;}}
