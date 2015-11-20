@@ -1,4 +1,10 @@
-/*jslint white: true, vars: true, sloppy: true, devel: true, plusplus: true, browser: true */
+/*jslint white: true*/
+/*jslint vars: true*/
+/*jslint sloppy: true*/
+/*jslint devel: true*/
+/*jslint plusplus: true*/
+/*jslint browser: true */
+
 /*global CoreView, CoreClass*/
 
 (function (a) {
@@ -63,12 +69,24 @@ CoreApplication.prototype.setReadOnly = function (name, value) {
 };
 
 CoreApplication.prototype.ready = function () {
+
+    var self = this;
+
+    $(document).bind("UPDATE_DONE", function cbUpdateDone() {
+        self.openFirstView();
+    });
+
     this.initTemplates();
     this.initModels();
     this.initViews();
 
     this.initialize();
-    this.openFirstView();
+
+    this.updateVersion();
+};
+
+CoreApplication.prototype.updateVersion = function () {
+    $(document).trigger("UPDATE_DONE");
 };
 
 CoreApplication.prototype.registerView = function (fn) {
