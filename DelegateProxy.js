@@ -1,5 +1,6 @@
 /**
- * This class delegates certain
+ * app to pass operation handling to different objects, while
+ * encapsulating the operational class(es).
  */
 function DelegateProxy(operator, delegate) {
     // the operator MUST be an instance.
