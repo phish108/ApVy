@@ -6,28 +6,29 @@
             overflow: scroll;
             border: 1px solid black;
         }
-        
+
         [role~=view] { display: none; }
         [role~=view].active { display: block; height: 110vh; border: 1px solid red;}
         </style>
     </head>
     <body>
-        <div class="block">
-        <div id="start" role="view MouseHandler" class="active" data-mouse="click" data-touch="tap">
-            <div id="fromStartToBarButton" role="button click" data-operator="change" href="#bar">
-                change to Bar
+        <div class="block"> <!-- needed to make the scrolling work for now -->
+            <div id="start" role="view MouseHandler" class="active" data-mouse="click" data-touch="tap">
+                <div id="fromStartToBarButton" role="button click" data-operator="change" href="#bar">
+                    change to Bar
+                </div>
+            </div>
+
+            <div id="bar" role="view MouseHandler scroller" data-mouse="click scroll">
+                <div>
+                    hi! I am Bar!
+                </div>
+                <div id="backToStartButton" role="button click" data-operator="change" href="#start">
+                    back
+                </div>
             </div>
         </div>
 
-        <div id="bar" role="view MouseHandler scroller" data-mouse="click scroll">
-            <div>
-                hi! I am Bar!
-            </div>
-            <div id="backToStartButton" role="button click" data-operator="change" href="#start">
-                back
-            </div>
-        </div>
-        </div>
         <script src="jquery.js" type="text/javascript"></script>
 
         <script src="scroller.js" type="text/javascript"></script>
