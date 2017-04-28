@@ -20,8 +20,8 @@ window.MouseHandler = class MouseHandler {
     }
 
     handleEvent(event) {
-        // ensure that we are not running 
-        if ($(this.target).hasClass('active')) {
+        // ensure that we are not running
+        if (this.target.classList.contains('active')) {
             if (event.target) {
                 let attrRole = event.target.getAttribute("role")
                 if (attrRole) {

@@ -11,11 +11,11 @@ class Vy {
     }
 
     open() {
-        $(this.target).addClass('active');
+        this.target.classList.add('active');
     }
 
     close() {
-        $(this.target).removeClass('active');
+        this.target.classList.remove('active');
     }
 }
 
@@ -27,7 +27,8 @@ class Ap {
     }
 
     findViews() {
-        $('[role~=view]').map((e,t) => this.registerView(t));
+        Array.prototype.slice.call(document.querySelectorAll('[role~=view]')).map((t) => this.registerView(t));
+        // $('[role~=view]').map((e,t) => this.registerView(t));
     }
 
     registerView(target) {
@@ -54,7 +55,7 @@ class Ap {
             // allow all delegates to register their event handlers
             this.views[`#${target.id}`].registerEvents();
 
-            if (!this.active || $(target).hasClass('active')) {
+            if (!this.active || target.classList.contains('active')) {
                 this.active = `#${target.id}`;
             }
         }
