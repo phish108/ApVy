@@ -19,6 +19,7 @@ function DelegateProxy(operator, delegate) {
         construct: function(o, args, p) {
             return p;
         },
+
         set: function(o,p,v) {
             if (!o[p]) {
                 // all operator properties and functions are read only for the
@@ -26,6 +27,7 @@ function DelegateProxy(operator, delegate) {
                 delegate[p] = v;
             }
         },
+
         get: function(o,p) {
             // NOTE: You cannot override the operator functions.
             // This is because delegates are called, whenever the operator
@@ -34,25 +36,27 @@ function DelegateProxy(operator, delegate) {
             // change but preceed with additional operations.
             // An operator should be clear on the functions it exposes and
             // what it does.
+            if (typeof operator[p] === "function" &&
+                typeof delegate[p] === "function") {
+                    // arrow operators won't work here because this would
+                    // point to the handler object of the proxy
+                    return function (...args) {
+                        console.log("operation extension");
+                        let result = delegate[p].apply(this, args);
+                        // handle the result ONLY, if the delegate did not return
+                        // anything useful.
+                        if (!result || !result.length) {
+                            result = operator[p].apply(this, args);
+                        }
+                        return result;
+                    };
+            }
+
             if (operator[p]) {
-                if (typeof operator[p] === "function" &&
-                    typeof delegate[p] === "function") {
-                        // arrow operators won't work here because this would
-                        // point to the handler object of the proxy
-                        return function (...args) {
-                            delegate[p].apply(this, args);
-                            operator[p].apply(this, args);
-                        };
-                }
                 return operator[p];
             }
-            if (delegate[p]) {
-                return delegate[p];
-            }
-            // return a noOp function
-            return () => {
-                return "";
-            };
+
+            return delegate[p];
         }
     });
 }
