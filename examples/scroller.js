@@ -1,6 +1,6 @@
 class scroller {
     scroll(target, evt) {
-        // make something happen on mouse scroll
+        // do something on mouse scroll
         console.log("scroll");
     }
 }
