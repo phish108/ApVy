@@ -30,6 +30,10 @@ class Vy {
     close() {
         if (this.active()) {
             this.target.classList.remove('active');
+
+            // close all subviews
+            let subViews = this.app.selectSubList(this.target, '[data-view][role=group].active').map((t) => `#${t.id}`);
+            subViews.map((view) => this.app.closeView(view));
         }
     }
 
@@ -106,12 +110,15 @@ class Vy {
                 (evt) => this.__registerEventOnTarget(this.target, evt)
             );
 
-            // then register element specific events
-            let eventTargets = this.app.selectSubList(this.target,'[data-events]');
+            // then register element specific events unless there are subviews
+            // with subviews ALL sub events MUST be handled by the sub view
+            if (!this.app.selectSubList(this.target, '[data-view][role=group]').length) {
+                let eventTargets = this.app.selectSubList(this.target,'[data-events]');
 
-            eventTargets.map((et) => et.dataset.events.split(" ").map(
-                (evt) => this.__registerEventOnTarget(et, evt)
-            ));
+                eventTargets.map((et) => et.dataset.events.split(" ").map(
+                    (evt) => this.__registerEventOnTarget(et, evt)
+                ));
+            }
         }
     }
 
@@ -161,10 +168,6 @@ class Ap {
 
             // allow all delegates to register their event handlers
             this.views[`#${target.id}`].registerEvents();
-
-            if (!this.active || target.classList.contains('active')) {
-                this.active = `#${target.id}`;
-            }
         }
     }
 

@@ -4,7 +4,7 @@
         [data-view][role~=group] { display: none; }
         [data-view][role~=group].active { display: block;}
 
-        .block {
+        .container {
             height: 50vh;
             overflow: scroll;
         }
@@ -33,7 +33,7 @@
 
         <div id="bar" role="group" data-view="scroller" data-events="click tap">
             <div id="barScrollCounter">0</div>
-            <div id="barScrollContent" class="block" data-events="scroll">
+            <div id="barScrollContent" class="container" data-events="scroll">
                 <div class="content">
                     <div>
                         <p>hi! I am the Bar View!</p>
