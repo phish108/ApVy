@@ -4,11 +4,20 @@ class Vy {
         this.app    = app;
     }
 
-    change(target) {
-        // we don't accidentally change the view
-        if (this.active()) {
+    changeTo(hrefTarget) {
+        // we won't change the view if we are not active
+        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+        if (this.active() && target.length) {
             this.close();
-            this.app.openView(target.getAttribute('href'));
+            this.app.openView(target);
+        }
+    }
+
+    openView(hrefTarget) {
+        // don't open other views if we are not active
+        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+        if (this.active() && target.length) {
+            this.app.openView(target);
         }
     }
 
@@ -31,17 +40,21 @@ class Vy {
     }
 
     eventDeepPath(event) {
-        if (event.deepPath) {
+        if (event.deepPath) { // new w3 draft
             return event.deepPath;
         }
-        if (!event.currentTarget) {
+        if (event.path) {     // chrome specific
+            return event.path;
+        }
+        if (!event.currentTarget) { // no bubble
             return [event.target];
         }
 
         let node = event.target;
         let result = [];
 
-        while (!node.isSameNode(event.currentTarget)) {
+        // find all elements that this event has bubbled through
+        while (node && !node.isSameNode(event.currentTarget)) {
             result[result.length] = node;
             node = node.parentNode;
         }
@@ -49,42 +62,18 @@ class Vy {
         return result;
     }
 
-    eventOperator(event) {
+    findEventOperator(event) {
         let targets = this.eventDeepPath(event);
 
-        for (let i = 0; i < targets.length; i++) {
-            if (targets[i].dataset &&
-                targets[i].dataset.operator) {
+        let result = targets.find((t) => (t.dataset && t.dataset.operator));
 
-                return targets[i];
-            }
-        }
-
-        return event.currentTarget;
-    }
-
-    registerEvents() {
-        if (this.target &&
-            this.target.dataset &&
-            this.target.dataset.events) {
-
-            let events = this.target.dataset.events.split(" ");
-
-            for (let i = 0; i < events.length; i++) {
-                if (events[i] === "scroll") {
-                    this.target.parentNode.addEventListener(events[i], (e) => this.handleEvent(e));
-                }
-                else {
-                    this.target.addEventListener(events[i], (e) => this.handleEvent(e));
-                }
-            }
-        }
+        return result ? result : event.currentTarget;
     }
 
     handleEvent(event) {
         // ensure that we are running
         if (this.active()) {
-            let target = this.eventOperator(event);
+            var target = this.findEventOperator(event);
 
             if (target &&
                 target.dataset.operator &&
@@ -93,9 +82,33 @@ class Vy {
                     this[target.dataset.operator](target, event);
             }
             else if (typeof this[event.type] === "function"){
-                this[event.type](target, event);
+                this[event.type]((target ? target : this.target), event);
             }
         }
+    }
+
+    registerEvents() {
+        if (this.target &&
+            this.target.dataset &&
+            this.target.dataset.events) {
+
+            // first register all Events on self
+            let events = this.target.dataset.events.split(" ");
+            events.map(
+                (evt) => this.__registerEventOnTarget(this.target, evt)
+            );
+
+            // then register element specific events
+            let eventTargets = this.app.selectSubList(this.target,'[data-events]');
+
+            eventTargets.map((et) => et.dataset.events.split(" ").map(
+                (evt) => this.__registerEventOnTarget(et, evt)
+            ));
+        }
+    }
+
+    __registerEventOnTarget(target, eventType) {
+        target.addEventListener(eventType, (e) => this.handleEvent(e));
     }
 }
 
@@ -111,7 +124,11 @@ class Ap {
     }
 
     selectList(selector) {
-        return Array.prototype.slice.call(document.querySelectorAll(selector));
+        return this.selectSubList(document, selector);
+    }
+
+    selectSubList(parent, selector) {
+        return Array.prototype.slice.call(parent.querySelectorAll(selector));
     }
 
     registerView(target) {
@@ -163,6 +180,10 @@ class Ap {
         this.selectList('[data-view][role=group].active').map((t) => this.refreshView(`#${t.id}`));
     }
 
+    update() {
+        this.selectList('[data-view][role=group].active').map((t) => this.updateView(`#${t.id}`));
+    }
+
     refreshView(targetid) {
         if (this.views[targetid] && !this.views[targetid].active()) {
             if (typeof this.views[targetid].reset === "function") {
@@ -174,8 +195,17 @@ class Ap {
         }
     }
 
+    // update is like refresh, but without resetting.
+    updateView(targetid) {
+        if (this.views[targetid] && !this.views[targetid].active()) {
+            if (typeof this.views[targetid].update === "function") {
+                this.views[targetid].update();
+            }
+        }
+    }
+
     activeViews() {
-        return this.selectList('[data-view][role=group].active')).map((t) => `#${t.id}`);
+        return this.selectList('[data-view][role=group].active').map((t) => `#${t.id}`);
     }
 }
 

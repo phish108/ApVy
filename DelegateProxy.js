@@ -41,7 +41,6 @@ function DelegateProxy(operator, delegate) {
                     // arrow operators won't work here because this would
                     // point to the handler object of the proxy
                     return function (...args) {
-                        console.log("operation extension");
                         let result = delegate[p].apply(this, args);
                         // handle the result ONLY, if the delegate did not return
                         // anything useful.
@@ -60,7 +59,3 @@ function DelegateProxy(operator, delegate) {
         }
     });
 }
-
-// if (module) {
-//     module.exports = DelegateProxy;
-// }
