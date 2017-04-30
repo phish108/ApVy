@@ -1,11 +1,8 @@
 class scroller {
-    // catch the scroll event
+    // catch the scroll event and display the position in the scroll counter
     scroll(target, evt) {
-        // do something on mouse scroll
-        let counter = document.getElementById("barScrollCounter"),
-            block   = document.getElementById("barScrollContent");
-
-        counter.textContent = block.scrollTop;
+        document.getElementById("barScrollCounter").textContent = target.scrollTop;
+        // or: $("#barScrollCounter").text(target.scrollTop);
     }
 
     // catch the close event
