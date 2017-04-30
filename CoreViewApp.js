@@ -78,8 +78,16 @@ class Vy {
             if (target &&
                 target.dataset.operator &&
                 typeof this[target.dataset.operator] === "function") {
-                    // we have a special event operator
-                    this[target.dataset.operator](target, event);
+
+                // we have a special event operator
+                this[target.dataset.operator](target, event);
+            }
+            else if (target &&
+                     target.getAttribute("data-operator") &&
+                     typeof this[target.getAttribute("data-operator")] === "function") {
+
+                // this catches a safari bug, when the dataset is sometimes lost.
+                this[target.getAttribute("data-operator")](target, event);
             }
             else if (typeof this[event.type] === "function"){
                 this[event.type]((target ? target : this.target), event);
