@@ -1,4 +1,4 @@
-const CoreApp = {
+const ApVyManager = {
     views: {},
     addView(viewClass) {
         if (typeof viewClass === "function"){
