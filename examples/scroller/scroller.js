@@ -14,4 +14,4 @@ class scroller {
     }
 }
 
-CoreApp.addView(scroller);
+ApVyManager.addView(scroller);
