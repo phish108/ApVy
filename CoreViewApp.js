@@ -32,7 +32,7 @@ class Vy {
             this.target.classList.remove('active');
 
             // close all subviews
-            let subViews = this.app.selectSubList(this.target, '[data-view][role=group].active').map((t) => `#${t.id}`);
+            let subViews = this.selectSubList(this.target, '[data-view][role=group].active').map((t) => `#${t.id}`);
             subViews.map((view) => this.app.closeView(view));
         }
     }
@@ -63,13 +63,18 @@ class Vy {
             node = node.parentNode;
         }
 
+        // add the currentTarget to the list
+        result[result.length] = event.currentTarget;
+
         return result;
     }
 
     findEventOperator(event) {
         let targets = this.eventDeepPath(event);
 
-        let result = targets.find((t) => (t.dataset && t.dataset.operator));
+        let result = targets.find(
+            (t) => (t.dataset && (t.dataset.operator || t.getAttribute("data-operator")))
+        );
 
         return result ? result : event.currentTarget;
     }
@@ -78,20 +83,14 @@ class Vy {
         // ensure that we are running
         if (this.active()) {
             var target = this.findEventOperator(event);
+            var operator = target.dataset.operator || target.getAttribute("data-operator");
 
             if (target &&
-                target.dataset.operator &&
-                typeof this[target.dataset.operator] === "function") {
+                operator &&
+                typeof this[operator] === "function") {
 
                 // we have a special event operator
                 this[target.dataset.operator](target, event);
-            }
-            else if (target &&
-                     target.getAttribute("data-operator") &&
-                     typeof this[target.getAttribute("data-operator")] === "function") {
-
-                // this catches a safari bug, when the dataset is sometimes lost.
-                this[target.getAttribute("data-operator")](target, event);
             }
             else if (typeof this[event.type] === "function"){
                 this[event.type]((target ? target : this.target), event);
@@ -112,14 +111,22 @@ class Vy {
 
             // then register element specific events unless there are subviews
             // with subviews ALL sub events MUST be handled by the sub view
-            if (!this.app.selectSubList(this.target, '[data-view][role=group]').length) {
-                let eventTargets = this.app.selectSubList(this.target,'[data-events]');
+            if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
+                let eventTargets = this.selectSubList(this.target,'[data-events]');
 
                 eventTargets.map((et) => et.dataset.events.split(" ").map(
                     (evt) => this.__registerEventOnTarget(et, evt)
                 ));
             }
         }
+    }
+
+    selectList(selector) {
+        return this.selectSubList(document, selector);
+    }
+
+    selectSubList(parent, selector) {
+        return Array.prototype.slice.call(parent.querySelectorAll(selector));
     }
 
     __registerEventOnTarget(target, eventType) {
@@ -135,15 +142,7 @@ class Ap {
         this.views = {};
 
         // find views
-        this.selectList('[data-view][role=group]').map((t) => this.registerView(t));
-    }
-
-    selectList(selector) {
-        return this.selectSubList(document, selector);
-    }
-
-    selectSubList(parent, selector) {
-        return Array.prototype.slice.call(parent.querySelectorAll(selector));
+        this.coreView.selectList('[data-view][role=group]').map((t) => this.registerView(t));
     }
 
     registerView(target) {
@@ -184,15 +183,15 @@ class Ap {
     }
 
     closeAll() {
-        this.selectList('[data-view][role=group].active').map((t) => this.closeView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group].active').map((t) => this.closeView(`#${t.id}`));
     }
 
     refresh() {
-        this.selectList('[data-view][role=group].active').map((t) => this.refreshView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group].active').map((t) => this.refreshView(`#${t.id}`));
     }
 
     update() {
-        this.selectList('[data-view][role=group].active').map((t) => this.updateView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group].active').map((t) => this.updateView(`#${t.id}`));
     }
 
     refreshView(targetid) {
@@ -216,7 +215,7 @@ class Ap {
     }
 
     activeViews() {
-        return this.selectList('[data-view][role=group].active').map((t) => `#${t.id}`);
+        return this.coreView.selectList('[data-view][role=group].active').map((t) => `#${t.id}`);
     }
 }
 
