@@ -9,7 +9,6 @@ class masterview {
             this.subactive = false;
             this.app.openView("#subview2");
         }
-        // or: $("#barScrollCounter").text(target.scrollTop);
     }
 
     // catch the close event
