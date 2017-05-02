@@ -33,7 +33,7 @@ class Vy {
      */
     open() {
         if (!this.active()) {
-            this.target.classList.add('active');
+            this.target.removeAttribute('hidden');
         }
     }
 
@@ -51,7 +51,7 @@ class Vy {
      */
     close() {
         if (this.active()) {
-            this.target.classList.remove('active');
+            this.target.setAttribute('hidden', 'hidden');
 
             // close all subviews
             this.app.closeAll(this.target);
@@ -65,8 +65,7 @@ class Vy {
      */
     active() {
         return (this.target &&
-                this.target.classList &&
-                this.target.classList.contains('active'));
+                !this.target.hasAttribute('hidden'));
     }
 
     /**
@@ -460,11 +459,11 @@ class Ap {
      * @param {DOMElement} target
      */
     registerView(target) {
-        if (ApVyManager) {
-            let dv = {
-                target:target
-            };
+        let dv = {
+            target:target
+        };
 
+        if (ApVyManager) {
             let views = target.dataset.view;
             if (views && views.length) {
                 views = views.split(" ");
@@ -476,16 +475,16 @@ class Ap {
                     dv = new DelegateProxy(dv, ApVyManager.views[views[i]]);
                 }
             }
+        }
 
-            let viewid = target.id || views[views.length - 1];
-            viewid = `#${viewid}`;
+        let viewid = target.id || views[views.length - 1];
+        viewid = `#${viewid}`;
 
-            if (!this.views[viewid]) {
-                this.views[viewid] = new DelegateProxy(this.coreView, dv);
+        if (!this.views[viewid]) {
+            this.views[viewid] = new DelegateProxy(this.coreView, dv);
 
-                // allow all delegates to register their event handlers
-                this.views[viewid].registerEvents();
-            }
+            // allow all delegates to register their event handlers
+            this.views[viewid].registerEvents();
         }
     }
 
@@ -524,10 +523,10 @@ class Ap {
     closeAll(parent) {
         let viewlist;
         if (parent) {
-            viewlist = this.coreView.selectSubList(parent, '[data-view][role=group].active');
+            viewlist = this.coreView.selectSubList(parent, '[data-view][role=group]:not([hidden])');
         }
         else {
-            viewlist = this.coreView.selectList('[data-view][role=group].active');
+            viewlist = this.coreView.selectList('[data-view][role=group]:not([hidden])');
         }
 
         viewlist.map((t) => this.closeView(`#${t.id}`));
@@ -537,7 +536,7 @@ class Ap {
      * asks all active application views to refresh (redraw) their data
      */
     refresh() {
-        this.coreView.selectList('[data-view][role=group].active').map((t) => this.refreshView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => this.refreshView(`#${t.id}`));
     }
 
     /**
@@ -545,7 +544,7 @@ class Ap {
      * information
      */
     update() {
-        this.coreView.selectList('[data-view][role=group].active').map((t) => this.updateView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => this.updateView(`#${t.id}`));
     }
 
     /**
@@ -594,7 +593,7 @@ class Ap {
      * @returns {ArrayOfDOMElements}
      */
     activeViews() {
-        return this.coreView.selectList('[data-view][role=group].active').map((t) => `#${t.id}`);
+        return this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => `#${t.id}`);
     }
 
     /**
@@ -603,13 +602,13 @@ class Ap {
      * @param {DOMElement} parent - optional for getting subviews
      * @returns {ArrayOfDOMElements}
      */
-    presentViews(parent) {
+    allViews(parent) {
         let viewlist;
         if (parent) {
-            viewlist = this.coreView.selectSubList(parent,'[data-view][role=group].active');
+            viewlist = this.coreView.selectSubList(parent,'[data-view][role=group]');
         }
         else {
-            viewlist = this.coreView.selectList('[data-view][role=group].active');
+            viewlist = this.coreView.selectList('[data-view][role=group]');
         }
         return viewlist.map((t) => `#${t.id}`);
     }
@@ -620,7 +619,7 @@ class Ap {
     hasView(viewid, parent) {
         if (this.views[viewid]) {
             if (parent) {
-                if(this.presentViews(parent).includes(viewid)) {
+                if(this.allViews(parent).includes(viewid)) {
                     return true;
                 }
             }
