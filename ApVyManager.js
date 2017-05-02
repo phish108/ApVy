@@ -1,4 +1,4 @@
-const ApVyManager = {
+const ApVy = {
     views: {},
     addView(viewClass) {
         if (typeof viewClass === "function"){

@@ -264,23 +264,24 @@ class Vy {
     }
 
     /**
-     * returns the first element that contains a data-operator attribute
+     * returns the first element that contains a data-bind attribute
      *
      * Finds the first DOMElement bubbling chain of an event that holds a
      * reference information to a view operation.
      *
-     * View operations are linked in the UI via the data-operator attribute.
+     * View operations are linked in the UI via the data-bind attribute.
      * Such attribute may contain one (1) function name of the application
      * view.
      *
      * @param {Event} event - a DOM Event
-     * @returns {DOMElement} - the operator object
+     * @returns {DOMElement} - the UI object
      */
     findEventOperator(event) {
         let targets = this.eventDeepPath(event);
 
         let result = targets.find(
-            (t) => (t.dataset && (t.dataset.operator || t.getAttribute("data-operator") || t.dataset.toggle || t.getAttribute("data-toggle")))
+            (t) => (t.dataset && (t.dataset.bind || t.getAttribute("data-bind") ||
+                                  t.dataset.toggle || t.getAttribute("data-toggle")))
         );
 
         return result ? result : event.currentTarget;
@@ -309,7 +310,7 @@ class Vy {
         // ensure that we are running
         if (this.active()) {
             var target = this.findEventOperator(event);
-            var operator = target.dataset.operator || target.getAttribute("data-operator");
+            var operator = target.dataset.bind || target.getAttribute("data-bind");
 
             if (target.dataset.toggle || target.getAttribute("data-toggle")) {
                 operator = "toggle";
@@ -344,10 +345,10 @@ class Vy {
     registerEvents() {
         if (this.target &&
             this.target.dataset &&
-            this.target.dataset.events) {
+            this.target.dataset.event) {
 
             // first register all Events on self
-            let events = this.target.dataset.events.split(" ");
+            let events = this.target.dataset.event.split(" ");
             events.map(
                 (evt) => this.__registerEventOnTarget(this.target, evt)
             );
@@ -357,7 +358,7 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-events]');
 
-                eventTargets.map((et) => et.dataset.events.split(" ").map(
+                eventTargets.map((et) => et.dataset.event.split(" ").map(
                     (evt) => this.__registerEventOnTarget(et, evt)
                 ));
             }
@@ -459,16 +460,17 @@ class Ap {
      * @param {DOMElement} target
      */
     registerView(target) {
-        let dv = {
+        var dv = {
             target:target
         };
 
-        if (ApVyManager) {
-            let views = target.dataset.view;
-            if (views && views.length) {
-                views = views.split(" ");
-            }
+        var views = [];
 
+        if (target.dataset.view) {
+            views = target.dataset.view.split(" ");
+        }
+
+        if (window.ApVyManager) {
             // check for view classes IN THE ORDER OF APPEARANCE
             for (let i = 0; i < views.length; i++) {
                 if (typeof ApVyManager.views[views[i]] === "function") {
@@ -477,7 +479,11 @@ class Ap {
             }
         }
 
-        let viewid = target.id || views[views.length - 1];
+        let viewid = target.id;
+        if (!viewid) {
+            target.id = viewid = views[views.length - 1];
+        }
+
         viewid = `#${viewid}`;
 
         if (!this.views[viewid]) {
