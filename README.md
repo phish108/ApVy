@@ -137,40 +137,51 @@ view open. The ```href``` attribute uses the id selector syntax just like one
 would use with links to hope around the same UI. ```close``` just closes the
 active view and does not consider any attributes on a clicked button.
 
-In the example the ```changeTo``` method is bound to the button and the href
+In the example the ```changeTo``` method is bound to the button and the ```href```
 attribute points to the opposite view. So clicking on the buttons switches
 between the views, while all other clicks do nothing.
 
 ### data-toggle Support
 
-Bootstrap 4 introduces the data-toggle element to [ARIA tabs]().
-ApVy supports the data-toggle syntax: It closes an active element in the view
+Bootstrap 4 introduces the ```data-toggle``` attribute to [ARIA tabs](https://www.w3.org/TR/wai-aria/roles#tab).
+ApVy supports the ```data-toggle``` syntax: It closes an active element in the view
 and opens the referred element in the UI.
+
+If the ```data-toggle``` attribute is present, then it always overrides
+the ```data-bind``` attribute.
 
 The following example illustrates the toggle feature:
 
 ```HTML
 <div role="group" data-view="toggler" data-event="click" hidden>
-    <div>
+    <div role="tablist">
         <span role="tab" data-toggle="tab" href="#first">first</span> |
         <span role="tab" data-toggle="tab" href="#second">second</span> |
         <span role="tab" data-toggle="tab" href="#third">third</span>
     </div>
-    <div id="first" role="tab-panel">
-        This is the first content
-    </div>
-    <div id="second" role="tab-panel" hidden>
-        This is the second content
-    </div>
-    <div id="third" role="tab-panel" hidden>
-        This is the third content
+    <div>
+        <div id="first" role="tabpanel">
+            This is the first content
+        </div>
+        <div id="second" role="tabpanel" hidden>
+            This is the second content
+        </div>
+        <div id="third" role="tabpanel" hidden>
+            This is the third content
+        </div>
     </div>
 </div>
 ```
 
-Clicking on the different span elements with the tab-role will toggle the
-visibility of the corresponding tab-panels. This function is built into Vy, so
-no coding is required.
+Clicking on the different span elements with the ```tab```-role will toggle the
+visibility of the corresponding [tabpanels](https://www.w3.org/TR/wai-aria/roles#tabpanel).
+This function is built into Vy, so no coding is required.
+
+**Side Note**
+
+The aria specification actually uses ```aria-controls``` instead of href.  
+The ```aria-controls``` attribute contains the plain element id instead of an
+id-reference. ApVy supports both variants.
 
 ### Logic delegation instead of inheritance
 
@@ -179,9 +190,9 @@ and code extension. The problem with traditional class hierarchies, is that
 programmers must not forget to call any original logic when they override class
 functions.
 
-ApVy works around that problem through operation delegation. Operation
+ApVy works around that problem through **operation delegation**. Operation
 delegation delegates more specialized logic to more specialized components.
-ApVy does that via the data-view attributes. It allows to attach specialized
+ApVy does that via the ```data-view``` attributes. It allows to attach specialized
 view logic to a view without overwriting the original logic or having to worry
 to call it.
 
@@ -199,14 +210,14 @@ ApVy.addView(scroller);
 ```
 
 In this example a scroller class is created and added to ApVy. Because the
-classname appears in the UI's data-view attribute for the scroller UI, ApVy
-automatically hooks this class to the UI.
+classname appears in the UI's ```data-view``` attribute for the scroller UI, ApVy
+automatically hooks this class to the UI logic.
 
-The specialised scroller class implements only some cleanup logic in the close()
+The specialized scroller class implements only some cleanup logic in the ```close()```
 function. Due to operation delegation this does not affect the default behavior
-of the Vy class. During runtime the close method is called before the default
-close() operation of Vy. This releases the developers from having to remember
-triggering the default behavior in the super class.
+of the Vy class. During runtime the close method is called before the default ```close()```
+operation of Vy. This releases the developers from having to remember triggering
+the default behavior in the super class.
 
 The view classes are not entirely independent in operation delegation. All
 delegates for a view have access to the same information. This allows creating
