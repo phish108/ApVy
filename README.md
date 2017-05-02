@@ -240,7 +240,7 @@ can be found in the [examples](examples/subviews/)
 
 If you like to contribute to the project there a number of ways:
 
--   [report bugs and issues]()
+-   [report bugs and issues](https://github.com/phish108/ApVy/issues)
 -   write/translate documentation
 -   write more and better examples
 -   improve the code
