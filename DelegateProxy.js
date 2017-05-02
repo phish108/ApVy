@@ -25,7 +25,9 @@ function DelegateProxy(operator, delegate) {
                 // all operator properties and functions are read only for the
                 // proxy
                 delegate[p] = v;
+                return true;
             }
+            return false;
         },
 
         get: function(o,p) {

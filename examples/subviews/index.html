@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <style>
+        [data-view][role~=group] { display: none; }
+        [data-view][role~=group].active { display: block;}
+
+        .container {
+            height: 50vh;
+            overflow: scroll;
+        }
+
+        .content {
+            height: 100vh;
+            border: 1px solid black;
+            border-bottom: 5px solid red;
+        }
+
+        .content div:first-child {
+            height: 90vh;
+        }
+
+        [role=button] {
+            cursor: pointer;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="active" role="group" data-view="start" data-events="click tap">
+            <div role="button" data-operator="changeTo" href="#masterview">
+                Switch to Bar View
+            </div>
+        </div>
+
+        <div role="group" data-view="masterview"  data-events="click tap">
+                <div id="subview1" role="group" data-view="specialization1" data-events="click tap">
+                    <div>
+                        <p>hi! I am the first Specialization View!</p>
+                    </div>
+                </div>
+                <div id="subview2" role="group" data-view="specialization2" data-events="click tap">
+                    <div>
+                        <p>hi! I am the second Specialization View!</p>
+                    </div>
+                </div>
+                <div role="button" data-operator="changeTo" href="#start">
+                    back
+                </div>
+        </div>
+
+        <!-- always first -->
+        <script src="../../ApVyManager.js" type="text/javascript"></script>
+        <script src="../../DelegateProxy.js" type="text/javascript"></script>
+
+        <!-- app-specific logic -->
+        <script src="masterview.js" type="text/javascript"></script>
+        <script src="specialization1.js" type="text/javascript"></script>
+        <script src="specialization2.js" type="text/javascript"></script>
+
+        <!-- always last -->
+        <script src="../../ApVy.js" type="text/javascript"></script>
+    </body>
+</html>

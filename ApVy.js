@@ -97,7 +97,7 @@ class Vy {
      */
     changeTo(hrefTarget) {
         // we won't change the view if we are not active
-        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+        let target = typeof hrefTarget === "string" ? hrefTarget : hrefTarget.getAttribute("href");
         if (this.active() && target.length) {
             this.close();
             this.app.openView(target);
@@ -114,7 +114,7 @@ class Vy {
      * Toggle will always close all tabpanels under this view.
      */
     toggle(hrefTarget) {
-        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+        let target = typeof hrefTarget === "string" ? hrefTarget : hrefTarget.getAttribute("href");
 
         if (this.active() &&
             target.length) {
@@ -222,7 +222,7 @@ class Vy {
      */
     openView(hrefTarget) {
         // don't open other views if we are not active
-        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+        let target = typeof hrefTarget === "string" ? hrefTarget : hrefTarget.getAttribute("href");
         if (this.active() && target.length) {
             this.app.openView(target);
         }
@@ -326,6 +326,8 @@ class Vy {
             else if (typeof this[event.type] === "function"){
                 this[event.type]((target ? target : this.target), event);
             }
+            // end event bubbling here (needed for subviews)
+            event.stopPropagation();
         }
     }
 
