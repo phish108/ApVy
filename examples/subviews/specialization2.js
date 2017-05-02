@@ -1,7 +1,7 @@
 class specialization2 {
     // catch the scroll event and display the position in the scroll counter
     click() {
-        console.log("click from 2");
+        document.getElementById("specialization2Counter").textContent = parseInt(document.getElementById("specialization2Counter").textContent) + 1;
     }
 }
 
