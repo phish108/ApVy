@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <style>
+        .container {
+            height: 50vh;
+            overflow: scroll;
+        }
+
+        .content {
+            height: 100vh;
+            border: 1px solid black;
+            border-bottom: 5px solid red;
+        }
+
+        .content div:first-child {
+            height: 90vh;
+        }
+
+        [role=button], [role=tab] {
+            cursor: pointer;
+        }
+        </style>
+    </head>
+    <body>
+        <div role="group" data-view="start" data-event="click tap">
+            <div role="button" data-operator="changeTo" href="#toggler">
+                Switch to Tab View
+            </div>
+        </div>
+
+        <div role="group" data-view="toggler" data-event="click tap" hidden>
+            <div>
+                <span role="tab" data-toggle="tab" href="#first">first</span> |
+                <span role="tab" data-toggle="tab" href="#second">second</span> |
+                <span role="tab" data-toggle="tab" href="#third">third</span>
+            </div>
+            <div id="first" role="tab-panel">
+                Hello, this is the first content
+            </div>
+            <div id="second" role="tab-panel" hidden>
+                Hello, this is the second content
+            </div>
+            <div id="third" role="tab-panel" hidden>
+                Hello, this is the third content
+            </div>
+        </div>
+
+        <script src="../../DelegateProxy.js" type="text/javascript"></script>
+        <script src="../../ApVy.js" type="text/javascript"></script>
+    </body>
+</html>
