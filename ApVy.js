@@ -54,8 +54,7 @@ class Vy {
             this.target.classList.remove('active');
 
             // close all subviews
-            let subViews = this.selectSubList(this.target, '[data-view][role=group].active').map((t) => `#${t.id}`);
-            subViews.map((view) => this.app.closeView(view));
+            this.app.closeAll(this.target);
         }
     }
 
@@ -102,6 +101,110 @@ class Vy {
         if (this.active() && target.length) {
             this.close();
             this.app.openView(target);
+        }
+    }
+
+    /**
+     * toggles tab/tab-panel components so the provided target becomes visible
+     *
+     * toggle() closes all subviews and opens the provided subview.
+     * toggle() reads the data-toggle value to find out what is there to toggle.
+     *
+     * toggle uses the data-toggle attribute and expands as bootstrap 4 does.
+     * Toggle will always close all tabpanels under this view.
+     */
+    toggle(hrefTarget) {
+        let target = typeof hrefTarget === "string" ? href : hrefTarget.getAttribute("href");
+
+        if (this.active() &&
+            target.length) {
+
+            // TODO: use toggle animation
+            // TODO: pass an naimation style to show and hide functions
+            this.hideRole("tab-panel");
+            this.showId(target);
+        }
+    }
+
+    /**
+     * hides all descendents with the provided class
+     *
+     * hideClass() will expand a whitespace separated list of cssClasses to
+     * a CSS selector.
+     *
+     * Does not accept css selectors
+     *
+     * @param {Class_String} cssClass
+     */
+    hideClass(cssClass) {
+        if (this.target && cssClass && cssClass.length) {
+            let selector = cssClass.split(" ");
+            selector.unshift("");
+            this.selectSubList(this.target, selector.join(".")).map((e) => e.setAttribute("hidden", "hidden"));
+        }
+    }
+
+    /**
+     * hides all descendents with the provided ARIA role
+     *
+     * @param {Role_String} ariaRole
+     */
+    hideRole(ariaRole) {
+        if (this.target && ariaRole && ariaRole.length) {
+            let selector = `[role=${ariaRole}]`;
+            this.selectSubList(this.target, selector).map((e) => e.setAttribute("hidden", "hidden"));
+        }
+    }
+
+    /**
+     * hides an element with the provided ID
+     *
+     * @param {Id_String} elementId
+     */
+    hideId(elementId) {
+        if (this.target && elementId && elementId.length) {
+            this.selectSubList(this.target, elementId).map((e) => e.setAttribute("hidden", "hidden"));
+        }
+    }
+
+    /**
+     * shows all descendents with the provided class
+     *
+     * showClass() will expand a whitespace separated list of cssClasses to
+     * a CSS selector.
+     *
+     * Does not accept css selectors!
+     *
+     * @param {Class_String} cssClass
+     */
+    showClass(cssClass) {
+        if (this.target && cssClass && cssClass.length) {
+            let selector = cssClass.split(" ");
+            selector.unshift("");
+            this.selectSubList(this.target, selector.join(".")).map((e) => e.removeAttribute("hidden"));
+        }
+    }
+
+    /**
+     * shows all descendents with the provided ARIA role
+     *
+     * @param {Role_String} ariaRole
+     */
+    showRole(ariaRole) {
+        if (this.target && ariaRole && ariaRole.length) {
+            let selector = `[role=${ariaRole}]`;
+            this.selectSubList(this.target, selector).map((e) => e.removeAttribute("hidden"));
+        }
+    }
+
+    /**
+     * shows an element with the provided ID
+     *
+     * @param {Id_String} elementId
+     */
+    showId(elementId) {
+        if (this.target && elementId && elementId.length) {
+            this.selectSubList(this.target, elementId).map((e) => e.removeAttribute("hidden"));
         }
     }
 
@@ -178,7 +281,7 @@ class Vy {
         let targets = this.eventDeepPath(event);
 
         let result = targets.find(
-            (t) => (t.dataset && (t.dataset.operator || t.getAttribute("data-operator")))
+            (t) => (t.dataset && (t.dataset.operator || t.getAttribute("data-operator") || t.dataset.toggle || t.getAttribute("data-toggle")))
         );
 
         return result ? result : event.currentTarget;
@@ -209,12 +312,16 @@ class Vy {
             var target = this.findEventOperator(event);
             var operator = target.dataset.operator || target.getAttribute("data-operator");
 
+            if (target.dataset.toggle || target.getAttribute("data-toggle")) {
+                operator = "toggle";
+            }
+
             if (target &&
                 operator &&
                 typeof this[operator] === "function") {
 
                 // we have a special event operator
-                this[target.dataset.operator](target, event);
+                this[operator](target, event);
             }
             else if (typeof this[event.type] === "function"){
                 this[event.type]((target ? target : this.target), event);
@@ -409,9 +516,19 @@ class Ap {
 
     /**
      * closes all active application view
+     *
+     * @param {DOMElement} parent - optional parameter for subviews
      */
-    closeAll() {
-        this.coreView.selectList('[data-view][role=group].active').map((t) => this.closeView(`#${t.id}`));
+    closeAll(parent) {
+        let viewlist;
+        if (parent) {
+            viewlist = this.coreView.selectSubList(parent, '[data-view][role=group].active');
+        }
+        else {
+            viewlist = this.coreView.selectList('[data-view][role=group].active');
+        }
+
+        viewlist.map((t) => this.closeView(`#${t.id}`));
     }
 
     /**
@@ -476,6 +593,40 @@ class Ap {
      */
     activeViews() {
         return this.coreView.selectList('[data-view][role=group].active').map((t) => `#${t.id}`);
+    }
+
+    /**
+     * returns a list of all views
+     *
+     * @param {DOMElement} parent - optional for getting subviews
+     * @returns {ArrayOfDOMElements}
+     */
+    presentViews(parent) {
+        let viewlist;
+        if (parent) {
+            viewlist = this.coreView.selectSubList(parent,'[data-view][role=group].active');
+        }
+        else {
+            viewlist = this.coreView.selectList('[data-view][role=group].active');
+        }
+        return viewlist.map((t) => `#${t.id}`);
+    }
+
+    /**
+     * checks whether a view is present and configured
+     */
+    hasView(viewid, parent) {
+        if (this.views[viewid]) {
+            if (parent) {
+                if(this.presentViews(parent).includes(viewid)) {
+                    return true;
+                }
+            }
+            else {
+                return true;
+            }
+        }
+        return false
     }
 }
 

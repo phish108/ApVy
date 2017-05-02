@@ -1,2 +1,2 @@
-# CoreMVC
-JavaScript MVC Framework with a focus on learnability and simplicity
+# ApVy
+JavaScript MVC Framework with a focus on learnability and simplicity in mind

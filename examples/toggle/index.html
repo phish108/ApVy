@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <style>
+        [data-view][role~=group] { display: none; }
+        [data-view][role~=group].active { display: block;}
+
+        .container {
+            height: 50vh;
+            overflow: scroll;
+        }
+
+        .content {
+            height: 100vh;
+            border: 1px solid black;
+            border-bottom: 5px solid red;
+        }
+
+        .content div:first-child {
+            height: 90vh;
+        }
+
+        [role=button] {
+            cursor: pointer;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="active" role="group" data-view="start" data-events="click tap">
+            <div role="button" data-operator="changeTo" href="#scroller">
+                Switch to Bar View
+            </div>
+        </div>
+
+        <div role="group" data-view="scroller" data-events="click tap">
+            <div>
+                <span role="tab" data-toggle="tab" href="#first">first</span> |
+                <span role="tab" data-toggle="tab" href="#second">second</span> |
+                <span role="tab" data-toggle="tab" href="#third">third</span>
+            </div>
+            <div id="first" role="tab-panel">
+                Hello, this is the first content
+            </div>
+            <div id="second" role="tab-panel" hidden>
+                Hello, this is the second content
+            </div>
+            <div id="third" role="tab-panel" hidden>
+                Hello, this is the third content
+            </div>
+        </div>
+
+        <!-- always first -->
+        <script src="../../ApVyManager.js" type="text/javascript"></script>
+        <script src="../../DelegateProxy.js" type="text/javascript"></script>
+
+        <!-- always last -->
+        <script src="../../ApVy.js" type="text/javascript"></script>
+    </body>
+</html>
