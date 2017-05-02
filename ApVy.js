@@ -129,7 +129,7 @@ class Vy {
     }
 
     /**
-     * toggles tab/tab-panel components so the provided target becomes visible
+     * toggles tab/tabpanel components so the provided target becomes visible
      *
      * toggle() closes all subviews and opens the provided subview.
      * toggle() reads the data-toggle value to find out what is there to toggle.
@@ -138,16 +138,36 @@ class Vy {
      * Toggle will always close all tabpanels under this view.
      */
     toggle(hrefTarget) {
-        let target = typeof hrefTarget === "string" ? hrefTarget : hrefTarget.getAttribute("href");
+        let target = hrefTarget.getAttribute("aria-controls");
+
+        if (!target && hrefTarget.hasAttribute("href")) {
+            target = hrefTarget.getAttribute("href").substr(1);
+        }
 
         if (this.active() &&
+            target &&
             target.length) {
 
-            // TODO: use toggle animation
-            // TODO: pass an naimation style to show and hide functions
-            this.hideRole("tab-panel");
+            let parent = hrefTarget.parentNode;
+            while (parent &&
+                   !parent.isSameNode(this.target) &&
+                   parent.getAttribute("role") !== "tablist") {
+                parent = parent.parentNode;
+            }
+
+            // now get all tabs in the tablist and hide their panels
+            this.selectSubList(parent, "[role=tab]").map((e) => this.__hideTabControl(e));
             this.showId(target);
         }
+    }
+
+    __hideTabControl(element) {
+        let target = element.getAttribute("aria-controls");
+
+        if (!target && element.hasAttribute("href")) {
+            target = element.getAttribute("href").substr(1);
+        }
+        this.hideId(target);
     }
 
     /**
@@ -186,8 +206,11 @@ class Vy {
      * @param {Id_String} elementId
      */
     hideId(elementId) {
-        if (this.target && elementId && elementId.length) {
-            this.selectSubList(this.target, elementId).map((e) => e.setAttribute("hidden", "hidden"));
+        if (elementId && elementId.length) {
+            let e = document.getElementById(elementId);
+            if (e) {
+                e.setAttribute("hidden", "hidden");
+            }
         }
     }
 
@@ -227,8 +250,11 @@ class Vy {
      * @param {Id_String} elementId
      */
     showId(elementId) {
-        if (this.target && elementId && elementId.length) {
-            this.selectSubList(this.target, elementId).map((e) => e.removeAttribute("hidden"));
+        if (elementId && elementId.length) {
+            let e = document.getElementById(elementId);
+            if (e) {
+                e.removeAttribute("hidden");
+            }
         }
     }
 

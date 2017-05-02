@@ -22,25 +22,25 @@
         </style>
     </head>
     <body>
-        <div role="group" data-view="start" data-event="click tap">
-            <div role="button" data-operator="changeTo" href="#toggler">
+        <div role="group" data-view="start" data-event="click">
+            <div role="button" data-bind="changeTo" href="#toggler">
                 Switch to Tab View
             </div>
         </div>
 
-        <div role="group" data-view="toggler" data-event="click tap" hidden>
-            <div>
+        <div role="group" data-view="toggler" data-event="click" hidden>
+            <div role="tablist">
                 <span role="tab" data-toggle="tab" href="#first">first</span> |
                 <span role="tab" data-toggle="tab" href="#second">second</span> |
                 <span role="tab" data-toggle="tab" href="#third">third</span>
             </div>
-            <div id="first" role="tab-panel">
+            <div id="first" role="tabpanel">
                 Hello, this is the first content
             </div>
-            <div id="second" role="tab-panel" hidden>
+            <div id="second" role="tabpanel" hidden>
                 Hello, this is the second content
             </div>
-            <div id="third" role="tab-panel" hidden>
+            <div id="third" role="tabpanel" hidden>
                 Hello, this is the third content
             </div>
         </div>
