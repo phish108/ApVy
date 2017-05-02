@@ -1,8 +1,9 @@
 <html>
     <head>
         <style>
-        [data-view][role~=group] { display: none; }
-        [data-view][role~=group].active { display: block;}
+        [role=button] {
+            cursor: pointer;
+        }
 
         .container {
             height: 50vh;
@@ -19,27 +20,42 @@
             height: 90vh;
         }
 
-        [role=button] {
-            cursor: pointer;
-        }
         </style>
     </head>
+
     <body>
-        <div class="active" role="group" data-view="start" data-events="click tap">
+        <div role="group" data-view="start" data-events="click tap">
             <div role="button" data-operator="changeTo" href="#scroller">
-                Switch to Bar View
+                Switch to Scroll View
+            </div>
+            <div role="button" data-operator="changeTo" href="#navitron">
+                Switch to Navitron View
             </div>
         </div>
 
-        <div role="group" data-view="scroller" data-events="click tap">
+        <div role="group" data-view="scroller" data-events="click tap" hidden>
             <div id="barScrollContent" class="container" data-events="scroll">
                 <div class="content">
                     <div>
-                        <p>hi! I am the Bar View!</p>
+                        <p>hi! I am the Scroll View!</p>
                         <p>Scroll down, to get back</p>
                     </div>
                     <div role="button" data-operator="changeTo" href="#start">
                         back
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div role="group" data-view="navitron" data-events="click tap" hidden>
+                    <div>
+                        <p>hi! I am the Navitron View!</p>
+                    </div>
+                    <div role="button" data-operator="changeTo" href="#start">
+                        back to start
+                    </div>
+                    <div role="button" data-operator="changeTo" href="#scroller">
+                        change to the scroll view
                     </div>
                 </div>
             </div>

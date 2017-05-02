@@ -1,9 +1,6 @@
 <html>
     <head>
         <style>
-        [data-view][role~=group] { display: none; }
-        [data-view][role~=group].active { display: block;}
-
         .container {
             height: 50vh;
             overflow: scroll;
@@ -19,19 +16,19 @@
             height: 90vh;
         }
 
-        [role=button] {
+        [role=button], [role=tab] {
             cursor: pointer;
         }
         </style>
     </head>
     <body>
-        <div class="active" role="group" data-view="start" data-events="click tap">
+        <div role="group" data-view="start" data-events="click tap">
             <div role="button" data-operator="changeTo" href="#scroller">
-                Switch to Bar View
+                Switch to Tab View
             </div>
         </div>
 
-        <div role="group" data-view="scroller" data-events="click tap">
+        <div role="group" data-view="scroller" data-events="click tap" hidden>
             <div>
                 <span role="tab" data-toggle="tab" href="#first">first</span> |
                 <span role="tab" data-toggle="tab" href="#second">second</span> |

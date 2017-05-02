@@ -1,8 +1,8 @@
 <html>
     <head>
         <style>
-        [data-view][role~=group] { display: none; }
-        [data-view][role~=group].active { display: block;}
+        /*[data-view][role~=group] { display: none; }
+        [data-view][role~=group].active { display: block;}*/
 
         .container {
             height: 50vh;
@@ -25,18 +25,18 @@
         </style>
     </head>
     <body>
-        <div class="active" role="group" data-view="start" data-events="click tap">
+        <div role="group" data-view="start" data-events="click tap">
             <div role="button" data-operator="changeTo" href="#scroller">
-                Switch to Bar View
+                Switch to Scroller View
             </div>
         </div>
 
-        <div role="group" data-view="scroller" data-events="click tap">
+        <div role="group" data-view="scroller" data-events="click tap" hidden>
             <div id="barScrollCounter">0</div>
             <div id="barScrollContent" class="container" data-events="scroll">
                 <div class="content">
                     <div>
-                        <p>hi! I am the Bar View!</p>
+                        <p>hi! I am the Scroller View!</p>
                         <p>Scroll down, to get back</p>
                     </div>
                     <div role="button" data-operator="changeTo" href="#start">

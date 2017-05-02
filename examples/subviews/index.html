@@ -1,9 +1,6 @@
 <html>
     <head>
         <style>
-        [data-view][role~=group] { display: none; }
-        [data-view][role~=group].active { display: block;}
-
         .container {
             height: 50vh;
             overflow: scroll;
@@ -25,20 +22,20 @@
         </style>
     </head>
     <body>
-        <div class="active" role="group" data-view="start" data-events="click tap">
+        <div role="group" data-view="start" data-events="click tap">
             <div role="button" data-operator="changeTo" href="#masterview">
                 Switch to Bar View
             </div>
         </div>
 
-        <div role="group" data-view="masterview"  data-events="click tap">
-                <div id="subview1" role="group" data-view="specialization1" data-events="click tap">
+        <div role="group" data-view="masterview"  data-events="click tap" hidden>
+                <div id="subview1" role="group" data-view="specialization1" data-events="click tap" hidden>
                     <div>
                         <p>hi! I am the first Specialization View!</p>
                         <p id="specialization1Counter">0</p>
                     </div>
                 </div>
-                <div id="subview2" role="group" data-view="specialization2" data-events="click tap">
+                <div id="subview2" role="group" data-view="specialization2" data-events="click tap" hidden>
                     <div>
                         <p>hi! I am the second Specialization View!</p>
                         <p id="specialization2Counter">0</p>
