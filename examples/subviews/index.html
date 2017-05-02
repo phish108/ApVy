@@ -22,27 +22,26 @@
         </style>
     </head>
     <body>
-        <div role="group" data-view="start" data-events="click tap">
-            <div role="button" data-operator="changeTo" href="#masterview">
+        <div role="group" data-view="start" data-event="click tap">
+            <div role="button" data-bind="changeTo" href="#masterview">
                 Switch to Bar View
             </div>
         </div>
 
-        <div role="group" data-view="masterview"  data-events="click tap" hidden>
-                <div id="subview1" role="group" data-view="specialization1" data-events="click tap" hidden>
+        <div role="group" data-view="masterview"  data-event="click tap" hidden>
+                <div id="subview1" role="group" data-view="specialization1" data-event="click tap" hidden>
                     <div>
                         <p>hi! I am the first Specialization View!</p>
                         <p id="specialization1Counter">0</p>
                     </div>
                 </div>
-                <div id="subview2" role="group" data-view="specialization2" data-events="click tap" hidden>
+                <div id="subview2" role="group" data-view="specialization2" data-event="click tap" hidden>
                     <div>
                         <p>hi! I am the second Specialization View!</p>
                         <p id="specialization2Counter">0</p>
-
                     </div>
                 </div>
-                <div role="button" data-operator="changeTo" href="#start">
+                <div role="button" data-bind="changeTo" href="#start">
                     back
                 </div>
         </div>

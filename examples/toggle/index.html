@@ -22,13 +22,13 @@
         </style>
     </head>
     <body>
-        <div role="group" data-view="start" data-events="click tap">
-            <div role="button" data-operator="changeTo" href="#scroller">
+        <div role="group" data-view="start" data-event="click tap">
+            <div role="button" data-operator="changeTo" href="#toggler">
                 Switch to Tab View
             </div>
         </div>
 
-        <div role="group" data-view="scroller" data-events="click tap" hidden>
+        <div role="group" data-view="toggler" data-event="click tap" hidden>
             <div>
                 <span role="tab" data-toggle="tab" href="#first">first</span> |
                 <span role="tab" data-toggle="tab" href="#second">second</span> |
@@ -45,11 +45,7 @@
             </div>
         </div>
 
-        <!-- always first -->
-        <script src="../../ApVyManager.js" type="text/javascript"></script>
         <script src="../../DelegateProxy.js" type="text/javascript"></script>
-
-        <!-- always last -->
         <script src="../../ApVy.js" type="text/javascript"></script>
     </body>
 </html>

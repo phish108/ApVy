@@ -5,4 +5,4 @@ class specialization2 {
     }
 }
 
-ApVyManager.addView(specialization2);
+ApVy.addView(specialization2);

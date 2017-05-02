@@ -17,4 +17,4 @@ class masterview {
     }
 }
 
-ApVyManager.addView(masterview);
+ApVy.addView(masterview);

@@ -24,48 +24,42 @@
     </head>
 
     <body>
-        <div role="group" data-view="start" data-events="click tap">
-            <div role="button" data-operator="changeTo" href="#scroller">
+        <div role="group" data-view="start" data-event="click tap">
+            <div role="button" data-bind="changeTo" href="#scroller">
                 Switch to Scroll View
             </div>
-            <div role="button" data-operator="changeTo" href="#navitron">
+            <div role="button" data-bind="changeTo" href="#navitron">
                 Switch to Navitron View
             </div>
         </div>
 
-        <div role="group" data-view="scroller" data-events="click tap" hidden>
-            <div id="barScrollContent" class="container" data-events="scroll">
+        <div role="group" data-view="scroller" data-event="click tap" hidden>
+            <div id="barScrollContent" class="container" data-event="scroll">
                 <div class="content">
                     <div>
                         <p>hi! I am the Scroll View!</p>
                         <p>Scroll down, to get back</p>
                     </div>
-                    <div role="button" data-operator="changeTo" href="#start">
-                        back
+                    <div role="button" data-bind="changeTo" href="#start">
+                        back to start
                     </div>
                 </div>
             </div>
         </div>
 
-        <div role="group" data-view="navitron" data-events="click tap" hidden>
+        <div role="group" data-view="navitron" data-event="click tap" hidden>
                     <div>
                         <p>hi! I am the Navitron View!</p>
                     </div>
-                    <div role="button" data-operator="changeTo" href="#start">
+                    <div role="button" data-bind="changeTo" href="#start">
                         back to start
                     </div>
-                    <div role="button" data-operator="changeTo" href="#scroller">
+                    <div role="button" data-bind="changeTo" href="#scroller">
                         change to the scroll view
                     </div>
-                </div>
-            </div>
         </div>
 
-        <!-- always first -->
-        <script src="../../ApVyManager.js" type="text/javascript"></script>
         <script src="../../DelegateProxy.js" type="text/javascript"></script>
-
-        <!-- always last -->
         <script src="../../ApVy.js" type="text/javascript"></script>
     </body>
 </html>
