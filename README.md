@@ -238,9 +238,6 @@ can be found in the [examples](examples/subviews/)
 
 ## How to contribute?
 
-ApVy is licensed under the MIT License, which means it is completely open and
-free for use.
-
 If you like to contribute to the project there a number of ways:
 
 -   [report bugs and issues]()
@@ -259,3 +256,9 @@ number of the issue you have created.
 6.  Commit your changes (push them if needed).
 7.  Create a pull request stating that you fixed the reported issue (using the
 issue number).
+
+## License
+
+ApVy is licensed under the MIT License.
+
+For details please read the [LICENSE](LICENSE) file.
