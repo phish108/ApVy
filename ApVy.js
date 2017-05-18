@@ -119,10 +119,15 @@ class Vy {
      *
      * @param mixed hrefTarget: String or DOMElement
      */
-    changeTo(hrefTarget) {
+    changeTo(hrefTarget, event = null) {
         // we won't change the view if we are not active
         let target = typeof hrefTarget === "string" ? hrefTarget : hrefTarget.getAttribute("href");
+
         if (this.active() && target.length) {
+            if (event) {
+                event.preventDefault();
+            }
+
             this.close();
             this.app.openView(target);
         }
@@ -137,7 +142,8 @@ class Vy {
      * toggle uses the data-toggle attribute and expands as bootstrap 4 does.
      * Toggle will always close all tabpanels under this view.
      */
-    toggle(hrefTarget) {
+    toggle(hrefTarget, event = null) {
+
         let target = hrefTarget.getAttribute("aria-controls");
 
         if (!target && hrefTarget.hasAttribute("href")) {
@@ -148,6 +154,10 @@ class Vy {
             target &&
             target.length) {
 
+            if (event) {
+                event.preventDefault();
+            }
+
             let parent = hrefTarget.parentNode;
             while (parent &&
                    !parent.isSameNode(this.target) &&
@@ -156,7 +166,7 @@ class Vy {
             }
 
             // now get all tabs in the tablist and hide their panels
-            this.selectSubList(parent, "[role=tab]").map((e) => this.__hideTabControl(e));
+            this.selectSubList(parent, "[role=tab]").map(e => this.__hideTabControl(e));
             this.showId(target);
         }
     }
@@ -184,7 +194,7 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).map((e) => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector.join(".")).map(e => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -196,7 +206,7 @@ class Vy {
     hideRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).map((e) => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector).map(e => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -228,7 +238,7 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).map((e) => e.removeAttribute("hidden"));
+            this.selectSubList(this.target, selector.join(".")).map(e => e.removeAttribute("hidden"));
         }
     }
 
@@ -240,7 +250,7 @@ class Vy {
     showRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).map((e) => e.removeAttribute("hidden"));
+            this.selectSubList(this.target, selector).map(e => e.removeAttribute("hidden"));
         }
     }
 
@@ -331,8 +341,8 @@ class Vy {
         let targets = this.eventDeepPath(event);
 
         let result = targets.find(
-            (t) => (t.dataset && (t.dataset.bind || t.getAttribute("data-bind") ||
-                                  t.dataset.toggle || t.getAttribute("data-toggle")))
+            t => (t.dataset && (t.dataset.bind || t.getAttribute("data-bind") ||
+                                t.dataset.toggle || t.getAttribute("data-toggle")))
         );
 
         return result ? result : event.currentTarget;
@@ -401,7 +411,7 @@ class Vy {
             // first register all Events on self
             let events = this.target.dataset.event.split(" ");
             events.map(
-                (evt) => this.__registerEventOnTarget(this.target, evt)
+                evt => this.__registerEventOnTarget(this.target, evt)
             );
 
             // then register element specific events unless there are subviews
@@ -409,8 +419,8 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-events]');
 
-                eventTargets.map((et) => et.dataset.event.split(" ").map(
-                    (evt) => this.__registerEventOnTarget(et, evt)
+                eventTargets.map(et => et.dataset.event.split(" ").map(
+                    evt => this.__registerEventOnTarget(et, evt)
                 ));
             }
         }
@@ -457,7 +467,7 @@ class Vy {
      * @param {String} eventType - event to listen for.
      */
     __registerEventOnTarget(target, eventType) {
-        target.addEventListener(eventType, (e) => this.handleEvent(e));
+        target.addEventListener(eventType, e => this.handleEvent(e));
     }
 }
 
@@ -496,7 +506,7 @@ class Ap {
         // find and init models
 
         // find views
-        this.coreView.selectList('[data-view][role=group]').map((t) => this.registerView(t));
+        this.coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
     }
 
     /**
@@ -586,14 +596,14 @@ class Ap {
             viewlist = this.coreView.selectList('[data-view][role=group]:not([hidden])');
         }
 
-        viewlist.map((t) => this.closeView(`#${t.id}`));
+        viewlist.map(t => this.closeView(`#${t.id}`));
     }
 
     /**
      * asks all active application views to refresh (redraw) their data
      */
     refresh() {
-        this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => this.refreshView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.refreshView(`#${t.id}`));
     }
 
     /**
@@ -601,7 +611,7 @@ class Ap {
      * information
      */
     update() {
-        this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => this.updateView(`#${t.id}`));
+        this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.updateView(`#${t.id}`));
     }
 
     /**
@@ -650,7 +660,7 @@ class Ap {
      * @returns {ArrayOfDOMElements}
      */
     activeViews() {
-        return this.coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => `#${t.id}`);
+        return this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => `#${t.id}`);
     }
 
     /**
@@ -667,7 +677,7 @@ class Ap {
         else {
             viewlist = this.coreView.selectList('[data-view][role=group]');
         }
-        return viewlist.map((t) => `#${t.id}`);
+        return viewlist.map(t => `#${t.id}`);
     }
 
     /**
