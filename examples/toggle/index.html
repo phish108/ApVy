@@ -23,16 +23,16 @@
     </head>
     <body>
         <div role="group" data-view="start" data-event="click">
-            <div role="button" data-bind="changeTo" href="#toggler">
-                Switch to Tab View
+            <div role="button">
+                <a data-bind="changeTo" href="#toggler">Switch to Tab View</a>
             </div>
         </div>
 
         <div role="group" data-view="toggler" data-event="click" hidden>
             <div role="tablist">
-                <span role="tab" data-toggle="tab" href="#first">first</span> |
-                <span role="tab" data-toggle="tab" href="#second">second</span> |
-                <span role="tab" data-toggle="tab" href="#third">third</span>
+                <a role="tab" data-toggle="tab" href="#first">first</a> |
+                <a role="tab" data-toggle="tab" href="#second">second</a> |
+                <a role="tab" data-toggle="tab" href="#third">third</a>
             </div>
             <div id="first" role="tabpanel">
                 Hello, this is the first content
