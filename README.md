@@ -54,7 +54,6 @@ The following, very basic UI consists of two views "start" and
         world
     </div>
 
-    <!-- always last -->
     <script src="DelegateProxy.js" type="text/javascript"></script>
     <script src="ApVy.js" type="text/javascript"></script>
 <body>
@@ -95,7 +94,6 @@ both views.
         world
     </div>
 
-    <!-- always last -->
     <script src="DelegateProxy.js" type="text/javascript"></script>
     <script src="ApVy.js" type="text/javascript"></script>
 <body>
@@ -108,19 +106,18 @@ add a button to both views that allows us to navigate between them.
 <body>
     <div role="group" data-view="start" data-event="click">
         hello
-        <div role="button" data-bind="changeTo" href="#scroller">
+        <a role="button" data-bind="changeTo" href="#scroller">
             Switch
-        </div>
+        </a>
     </div>
 
     <div role="group" data-view="scroller" data-event="click" hidden>
         world
-        <div role="button" data-bind="changeTo" href="#start">
+        <a role="button" data-bind="changeTo" href="#start">
             Switch
-        </div>
+        </a>
     </div>
 
-    <!-- always last -->
     <script src="DelegateProxy.js" type="text/javascript"></script>
     <script src="ApVy.js" type="text/javascript"></script>
 <body>
@@ -155,9 +152,9 @@ The following example illustrates the toggle feature:
 ```HTML
 <div role="group" data-view="toggler" data-event="click" hidden>
     <div role="tablist">
-        <span role="tab" data-toggle="tab" href="#first">first</span> |
-        <span role="tab" data-toggle="tab" href="#second">second</span> |
-        <span role="tab" data-toggle="tab" href="#third">third</span>
+        <a role="tab" data-toggle="tab" href="#first">first</a> |
+        <a role="tab" data-toggle="tab" href="#second">second</a> |
+        <a role="tab" data-toggle="tab" href="#third">third</a>
     </div>
     <div>
         <div id="first" role="tabpanel">

@@ -401,6 +401,10 @@ class Vy {
      * data-events attributes defined.
      */
     registerEvents() {
+        if (!this.eventHandler) {
+            this.eventHandler = e => this.handleEvent(e);
+        }
+
         if (this.target &&
             this.target.dataset &&
             this.target.dataset.event) {
@@ -418,6 +422,29 @@ class Vy {
 
                 eventTargets.map(et => et.dataset.event.split(" ").map(
                     evt => this.__registerEventOnTarget(et, evt)
+                ));
+            }
+        }
+    }
+
+    resetEvents() {
+        if (this.target &&
+            this.target.dataset &&
+            this.target.dataset.event) {
+
+            // first register all Events on self
+            let events = this.target.dataset.event.split(" ");
+            events.map(
+                evt => this.__clearEventOnTarget(this.target, evt)
+            );
+
+            // then register element specific events unless there are subviews
+            // with subviews ALL sub events MUST be handled by the sub view
+            if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
+                let eventTargets = this.selectSubList(this.target,'[data-event]');
+
+                eventTargets.map(et => et.dataset.event.split(" ").map(
+                    evt => this.__clearEventOnTarget(et, evt)
                 ));
             }
         }
@@ -464,7 +491,11 @@ class Vy {
      * @param {String} eventType - event to listen for.
      */
     __registerEventOnTarget(target, eventType) {
-        target.addEventListener(eventType, e => this.handleEvent(e));
+        target.addEventListener(eventType, this.eventHandler);
+    }
+
+    __clearEventOnTarget(target, eventType) {
+        target.removeEventListener(eventType, this.eventHandler);
     }
 }
 
@@ -476,7 +507,7 @@ class Vy {
       * dispatches the given event type to ALL View elements AND to the
       * document. The event will not bubble! Models may want to register their
       * listeners to specific events to the document, rather than to one of the
-      * views. This allows them to capture events from other models. 
+      * views. This allows them to capture events from other models.
       */
      dispatchEvent(eventType, data=null) {
          let opts = {cancelable: true, bubbles: false};
@@ -558,6 +589,8 @@ class Ap {
         // first reset the models;
         this.initModels();
         // find views
+
+        Object.keys(this.views).map(v => this.views[v].resetEvents());
         this.views = {};
         // find views
         coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
