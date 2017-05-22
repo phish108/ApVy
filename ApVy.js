@@ -472,8 +472,14 @@ class Vy {
  * @class ApModel
  */
  class ApModel {
+     /**
+      * dispatches the given event type to ALL View elements AND to the
+      * document. The event will not bubble! Models may want to register their
+      * listeners to specific events to the document, rather than to one of the
+      * views. This allows them to capture events from other models. 
+      */
      dispatchEvent(eventType, data=null) {
-         let opts = {cancelable: true, bubbles: true};
+         let opts = {cancelable: true, bubbles: false};
          if (data) {
              opts.detail = data;
          }
@@ -482,6 +488,7 @@ class Vy {
          coreView.selectList('[data-view][role=group]').map(t => {
              t.dispatchEvent(event);
          });
+         document.dispatchEvent(event);
      }
  }
 
