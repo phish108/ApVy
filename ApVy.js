@@ -508,7 +508,6 @@ class Vy {
  */
  class ApModel {
      handleEvent(event) {
-         // ensure that we are running
          if (typeof this[event.type] === "function"){
              this[event.type](event);
          }
@@ -519,12 +518,26 @@ class Vy {
       * this allows models to listen to app events.
       */
      registerEventList(eventList) {
+         if (!this.eventHandler) {
+             this.eventHandler = e => this.handleEvent(e);
+         }
          if (Array.isArray(eventList)) {
-             eventList.map(evt => document.addEventListener(evt, e => this.handleEvent(e)));
+             if (!this.eventList) {
+                 this.eventList = [];
+             }
+
+             eventList.map(evt => document.addEventListener(evt, this.eventHandler));
+             this.eventList = this.eventList.concat(eventList);
          }
      }
 
      registerEvents() {}
+
+     resetEvents() {
+         if (this.eventList && this.eventList.length && this.eventHandler) {
+             this.eventList.map(e => document.removeEventListener(e, this.eventHandler));
+         }
+     }
 
      dispatchEvent(eventType, data) {
          this.app.dispatchEvent(eventType, data);
@@ -593,6 +606,7 @@ class Ap {
      * persistant state between displays, these states will be lost.
      */
     resetApp() {
+        Object.keys(this.models).map(m => this.models[m].resetEvents());
         this.models = {};
         // first reset the models;
         this.initModels();
