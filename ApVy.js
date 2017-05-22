@@ -98,14 +98,12 @@ class Vy {
      * if update() is called after a reset() call, then it is the same as
      * refreshing a view.
      */
-    update() {
-    }
+    update() {}
 
     /**
      * placeholder function that is called before refresh() and after close()
      */
-    reset() {
-    }
+    reset() {}
 
     /**
      * changes to a different application view and closes the present view.
@@ -471,6 +469,23 @@ class Vy {
 }
 
 /**
+ * @class ApModel
+ */
+ class ApModel {
+     dispatchEvent(eventType, data=null) {
+         let opts = {cancelable: true, bubbles: true};
+         if (data) {
+             opts.detail = data;
+         }
+
+         event = new CustomEvent(eventType, opts);
+         coreView.selectList('[data-view][role=group]').map(t => {
+             t.dispatchEvent(event);
+         });
+     }
+ }
+
+/**
  * @class Ap
  *
  * Ap is the core application controller underpinning the logic of ApVy.
@@ -500,9 +515,12 @@ class Ap {
         // find and init models
         this.viewClasses = {};
         this.viewDelegates = {};
+        this.modelDelegates = {};
         this.models = {};
 
-        this.loadHandler = () => resetViews();
+        this.loadHandler = () => this.resetApp();
+
+        this.rootModel = new DelegateProxy(new ApModel(), {app: this});
 
         if (coreView.selectList('[data-view][role=group]').length) {
             // ApVy runs at the end of the page
@@ -513,11 +531,11 @@ class Ap {
             this.isCordovaApp = !!window.cordova;
             if (this.isCordovaApp) {
                 // if running under cordova, we wait for the device drivers
-                document.addEventListener("deviceready", () => this.resetApp() );
+                document.addEventListener("deviceready", this.loadHandler);
             }
             else {
                 // in a normal web-browser we wait until the page has loaded
-                document.addEventListener("load", () => this.resetApp() );
+                document.addEventListener("load", this.loadHandler);
             }
         }
     }
@@ -529,11 +547,25 @@ class Ap {
      * persistant state between displays, these states will be lost.
      */
     resetApp() {
+        this.models = {};
+        // first reset the models;
+        this.initModels();
         // find views
         this.views = {};
         // find views
         coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
+
         this.appLoaded = true;
+        // remove all event listeners, so subsequent load events will not reset
+        // the app.
+        document.removeEventListener("load", this.loadHandler);
+        if (this.isCordovaApp) {
+            document.removeEventListener("deviceready", this.loadHandler);
+        }
+    }
+
+    initModels() {
+        Object.keys(this.modelDelegates).map(m => this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]));
     }
 
     /**
@@ -576,6 +608,20 @@ class Ap {
 
                 this.views[viewid] = new DelegateProxy(coreView, dv);
                 this.views[viewid].registerEvents();
+            }
+        }
+    }
+
+    addModel(modelClass) {
+        if (typeof modelClass === "function") {
+            if (!this.modelDelegates[modelClass.name]) {
+                this.modelDelegates[modelClass.name] = modelClass; // remember for reset
+
+                if (this.appLoaded) {
+                    if(!this.models[modelClass.name]) {
+                        this.models[modelClass.name] = new DelegateProxy(this.rootModel, modelClass);
+                    }
+                }
             }
         }
     }
