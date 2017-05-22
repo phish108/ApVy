@@ -498,12 +498,42 @@ class Ap {
      */
     constructor() {
         // find and init models
-        this.views = {};
         this.viewClasses = {};
+        this.viewDelegates = {};
         this.models = {};
 
+        this.loadHandler = () => resetViews();
+
+        if (coreView.selectList('[data-view][role=group]').length) {
+            // ApVy runs at the end of the page
+            this.resetApp();
+        }
+        else {
+            // ApVy runs in the header before the document is loaded
+            this.isCordovaApp = !!window.cordova;
+            if (this.isCordovaApp) {
+                // if running under cordova, we wait for the device drivers
+                document.addEventListener("deviceready", () => this.resetApp() );
+            }
+            else {
+                // in a normal web-browser we wait until the page has loaded
+                document.addEventListener("load", () => this.resetApp() );
+            }
+        }
+    }
+
+    /**
+     * reinitializes all views of the app as if the app is having a fresh start.
+     * This method can get used at anytime. It does not alter the document state
+     * but it will reinstatiate all view delegates. So if views have a
+     * persistant state between displays, these states will be lost.
+     */
+    resetApp() {
+        // find views
+        this.views = {};
         // find views
         coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
+        this.appLoaded = true;
     }
 
     /**
@@ -525,28 +555,42 @@ class Ap {
             if (!viewid) {
                 target.id = viewid = vl[vl.length -1];
             }
-
-            viewid = `#${viewid}`;
             vl.map(v => this.viewClasses[v] = viewid);
         }
 
-        if (viewid && !this.views[viewid]) {
-            const dv = {
-                target: target,
-                targetid: viewid,
-                app: this
-            };
+        if (viewid) {
+            viewid = `#${viewid}`;
 
-            this.views[viewid] = new DelegateProxy(coreView, dv);
-            this.views[viewid].registerEvents();
+            if (!this.views[viewid]) {
+                const dv = {
+                    target: target,
+                    targetid: viewid,
+                    app: this
+                };
+
+                vl.map(v => {
+                    if (this.viewDelegates[v]) {
+                        dv = new DelegateProxy(dv, this.viewDelegates[v]);
+                    }
+                });
+
+                this.views[viewid] = new DelegateProxy(coreView, dv);
+                this.views[viewid].registerEvents();
+            }
         }
     }
 
     addView(viewclass) {
         if (typeof viewclass === "function") {
-            let viewid = this.viewClasses[viewclass.name];
-            if (viewid && this.views[viewid]) {
-                this.views[viewid] = new DelegateProxy(this.views[viewid], viewclass);
+            if (!this.viewDelegates[viewclass.name]) {
+                this.viewDelegates[viewclass.name] = viewclass; // remember for reset
+
+                if (this.appLoaded) {
+                    let viewid = this.viewClasses[viewclass.name];
+                    if (viewid && this.views[viewid]) {
+                        this.views[viewid] = new DelegateProxy(this.views[viewid], viewclass);
+                    }
+                }
             }
         }
     }
