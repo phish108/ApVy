@@ -497,29 +497,37 @@ class Vy {
     __clearEventOnTarget(target, eventType) {
         target.removeEventListener(eventType, this.eventHandler);
     }
+
+    dispatchEvent(eventType, data=null) {
+        this.app.dispatchEvent(eventType, data);
+    }
 }
 
 /**
  * @class ApModel
  */
  class ApModel {
-     /**
-      * dispatches the given event type to ALL View elements AND to the
-      * document. The event will not bubble! Models may want to register their
-      * listeners to specific events to the document, rather than to one of the
-      * views. This allows them to capture events from other models.
-      */
-     dispatchEvent(eventType, data=null) {
-         let opts = {cancelable: true, bubbles: false};
-         if (data) {
-             opts.detail = data;
+     handleEvent(event) {
+         // ensure that we are running
+         if (typeof this[event.type] === "function"){
+             this[event.type](event);
          }
+     }
 
-         event = new CustomEvent(eventType, opts);
-         coreView.selectList('[data-view][role=group]').map(t => {
-             t.dispatchEvent(event);
-         });
-         document.dispatchEvent(event);
+     /**
+      * register a list of events for the model to the document.
+      * this allows models to listen to app events.
+      */
+     registerEventList(eventList) {
+         if (Array.isArray(eventList)) {
+             eventList.map(evt => document.addEventListener(evt, e => this.handleEvent(e)));
+         }
+     }
+
+     registerEvents() {}
+
+     dispatchEvent(eventType, data) {
+         this.app.dispatchEvent(eventType, data);
      }
  }
 
@@ -660,6 +668,7 @@ class Ap {
                 if (this.appLoaded) {
                     if(!this.models[modelClass.name]) {
                         this.models[modelClass.name] = new DelegateProxy(this.rootModel, modelClass);
+                        this.models[modelClass.name].registerEvents();
                     }
                 }
             }
@@ -821,6 +830,25 @@ class Ap {
             }
         }
         return false
+    }
+
+    /**
+     * dispatches the given event type to ALL View elements AND to the
+     * document. The event will not bubble! Models may want to register their
+     * listeners to specific events to the document, rather than to one of the
+     * views. This allows them to capture events from other models.
+     */
+    dispatchEvent(eventType, data=null) {
+        let opts = {cancelable: true, bubbles: false};
+        if (data) {
+            opts.detail = data;
+        }
+
+        event = new CustomEvent(eventType, opts);
+        coreView.selectList('[data-view][role=group]').map(t => {
+            t.dispatchEvent(event);
+        });
+        document.dispatchEvent(event);
     }
 }
 
