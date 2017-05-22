@@ -42,10 +42,6 @@
  *   of the view.
  */
 class Vy {
-    constructor(app) {
-        this.app    = app;
-    }
-
     /**
      * opens the present view.
      *
@@ -370,7 +366,14 @@ class Vy {
     handleEvent(event) {
         // ensure that we are running
         if (this.active()) {
-            var target = this.findEventOperator(event);
+            // finalVy contains the active view delegate during runtime.
+            // This is necessary, because this will not point to the last
+            // view class we have added, but to the proxy object that has
+            // be added initialially. Therefore, we must divert this to
+            // finalVy, so our specialised methods will get called, correctly.
+            const finalVy = ApVy.views[this.targetid];
+
+            var target = finalVy.findEventOperator(event);
             var operator = target.dataset.bind || target.getAttribute("data-bind");
 
             if (target.dataset.toggle || target.getAttribute("data-toggle")) {
@@ -379,13 +382,13 @@ class Vy {
 
             if (target &&
                 operator &&
-                typeof this[operator] === "function") {
+                typeof finalVy[operator] === "function") {
 
                 // we have a special event operator
-                this[operator](target, event);
+                finalVy[operator](target, event);
             }
-            else if (typeof this[event.type] === "function"){
-                this[event.type]((target ? target : this.target), event);
+            else if (typeof finalVy[event.type] === "function"){
+                finalVy[event.type]((target ? target : finalVy.target), event);
             }
             // end event bubbling here (needed for subviews)
             event.stopPropagation();
@@ -398,10 +401,6 @@ class Vy {
      * During the application initialization this method hooks the handleEvent()
      * method to all DOM Elements of the application view that have
      * data-events attributes defined.
-     *
-     * Application views may want to use this method to listen to other types of
-     * events. Normally, it is unnecessary to implement any logic for
-     * normal DOM Events.
      */
     registerEvents() {
         if (this.target &&
@@ -417,7 +416,7 @@ class Vy {
             // then register element specific events unless there are subviews
             // with subviews ALL sub events MUST be handled by the sub view
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
-                let eventTargets = this.selectSubList(this.target,'[data-events]');
+                let eventTargets = this.selectSubList(this.target,'[data-event]');
 
                 eventTargets.map(et => et.dataset.event.split(" ").map(
                     evt => this.__registerEventOnTarget(et, evt)
@@ -498,15 +497,13 @@ class Ap {
      * writing any code.
      */
     constructor() {
-        // the core view functions are kept in a signleton.
-        this.coreView = new Vy(this);
-        this.views  = {};
+        // find and init models
+        this.views = {};
+        this.viewClasses = {};
         this.models = {};
 
-        // find and init models
-
         // find views
-        this.coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
+        coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
     }
 
     /**
@@ -521,37 +518,36 @@ class Ap {
      * @param {DOMElement} target
      */
     registerView(target) {
-        var dv = {
-            target:target
-        };
 
-        var views = [];
-
-        if (target.dataset.view) {
-            views = target.dataset.view.split(" ");
-        }
-
-        if (window.ApVyManager) {
-            // check for view classes IN THE ORDER OF APPEARANCE
-            for (let i = 0; i < views.length; i++) {
-                if (typeof ApVyManager.views[views[i]] === "function") {
-                    dv = new DelegateProxy(dv, ApVyManager.views[views[i]]);
-                }
-            }
-        }
-
+        let vl = target.dataset.view.split(" ");
         let viewid = target.id;
-        if (!viewid) {
-            target.id = viewid = views[views.length - 1];
+        if (vl) {
+            if (!viewid) {
+                target.id = viewid = vl[vl.length -1];
+            }
+
+            viewid = `#${viewid}`;
+            vl.map(v => this.viewClasses[v] = viewid);
         }
 
-        viewid = `#${viewid}`;
+        if (viewid && !this.views[viewid]) {
+            const dv = {
+                target: target,
+                targetid: viewid,
+                app: this
+            };
 
-        if (!this.views[viewid]) {
-            this.views[viewid] = new DelegateProxy(this.coreView, dv);
-
-            // allow all delegates to register their event handlers
+            this.views[viewid] = new DelegateProxy(coreView, dv);
             this.views[viewid].registerEvents();
+        }
+    }
+
+    addView(viewclass) {
+        if (typeof viewclass === "function") {
+            let viewid = this.viewClasses[viewclass.name];
+            if (viewid && this.views[viewid]) {
+                this.views[viewid] = new DelegateProxy(this.views[viewid], viewclass);
+            }
         }
     }
 
@@ -590,10 +586,10 @@ class Ap {
     closeAll(parent) {
         let viewlist;
         if (parent) {
-            viewlist = this.coreView.selectSubList(parent, '[data-view][role=group]:not([hidden])');
+            viewlist = coreView.selectSubList(parent, '[data-view][role=group]:not([hidden])');
         }
         else {
-            viewlist = this.coreView.selectList('[data-view][role=group]:not([hidden])');
+            viewlist = coreView.selectList('[data-view][role=group]:not([hidden])');
         }
 
         viewlist.map(t => this.closeView(`#${t.id}`));
@@ -603,7 +599,7 @@ class Ap {
      * asks all active application views to refresh (redraw) their data
      */
     refresh() {
-        this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.refreshView(`#${t.id}`));
+        coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.refreshView(`#${t.id}`));
     }
 
     /**
@@ -611,7 +607,7 @@ class Ap {
      * information
      */
     update() {
-        this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.updateView(`#${t.id}`));
+        coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.updateView(`#${t.id}`));
     }
 
     /**
@@ -631,7 +627,7 @@ class Ap {
             if (typeof this.views[viewid].reset === "function") {
                 this.views[viewid].reset();
             }
-            if (typeof this.views[viewid].refresh === "function") {
+            if (typeof this.views[viewid].update === "function") {
                 this.views[viewid].update();
             }
         }
@@ -660,7 +656,7 @@ class Ap {
      * @returns {ArrayOfDOMElements}
      */
     activeViews() {
-        return this.coreView.selectList('[data-view][role=group]:not([hidden])').map(t => `#${t.id}`);
+        return coreView.selectList('[data-view][role=group]:not([hidden])').map(t => `#${t.id}`);
     }
 
     /**
@@ -672,10 +668,10 @@ class Ap {
     allViews(parent) {
         let viewlist;
         if (parent) {
-            viewlist = this.coreView.selectSubList(parent,'[data-view][role=group]');
+            viewlist = coreView.selectSubList(parent,'[data-view][role=group]');
         }
         else {
-            viewlist = this.coreView.selectList('[data-view][role=group]');
+            viewlist = coreView.selectList('[data-view][role=group]');
         }
         return viewlist.map(t => `#${t.id}`);
     }
@@ -698,7 +694,5 @@ class Ap {
     }
 }
 
-/**
- * Ap instances are not exposed to the global namespace.
- */
-new Ap();
+const coreView = new Vy();
+const ApVy = new Ap();
