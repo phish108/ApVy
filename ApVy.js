@@ -534,6 +534,50 @@ class Vy {
     get models() {
         return this.app.models;
     }
+
+    /**
+     * registers the event listener to the view's root element.
+     *
+     * This should be only done for events that are related to
+     * Model-View-Interactions. UI events should be listed in the
+     * data-event attribute.
+     *
+     * A view can also use registerEvent() and clearEvent() calls for
+     * temporarily waiting for external events.
+     *
+     * @param {String} eventType - the event the view wants to capture.
+     * @param {Boolean} always - capture the event even if the view is inactive, default = false.
+     */
+    registerEvent(eventType, always=false) {
+        this.__registerEventOnTarget(this.target, eventType);
+        if (always) {
+            if (!this.always) {
+                this.always = [];
+            }
+            if (this.always.indexOf(eventType) === -1) {
+                this.always.push(eventType);
+            }
+        }
+    }
+
+    /**
+     * unregisters the event listener on the target element.
+     *
+     * This function should get called in resetEvents() for non-ui events
+     * that a delegate registered in a separate registerEvents() implementation.
+     * This typically affects only Model-View-Interactions.
+     *
+     * An app can also use registerEvent() and clearEvent() calls for
+     * temporarily waiting for external signals.
+     *
+     * @param {String} eventType - the event the view captures.
+     */
+    clearEvent(eventType) {
+        this.__clearEventOnTarget(this.target, eventType);
+        if (this.always && this.always.indexOf(eventType) >= 0) {
+            delete this.always[eventType];
+        }
+    }
 }
 
 /**
