@@ -362,15 +362,19 @@ class Vy {
      * @param {Event} event
      */
     handleEvent(event) {
-        // ensure that we are running
-        if (this.active()) {
-            // finalVy contains the active view delegate during runtime.
-            // This is necessary, because this will not point to the last
-            // view class we have added, but to the proxy object that has
-            // be added initialially. Therefore, we must divert this to
-            // finalVy, so our specialised methods will get called, correctly.
-            const finalVy = ApVy.views[this.targetid];
+        // finalVy contains the active view delegate during runtime.
+        // This is necessary, because this will not point to the last
+        // view class we have added, but to the proxy object that has
+        // be added initialially. Therefore, we must divert this to
+        // finalVy, so our specialised methods will get called, correctly.
+        const finalVy = ApVy.views[this.targetid];
 
+        // ensure that we are running
+        // FIXME: handle state changes from other components while inactive?
+        // NOTE normally this is unwanted, because of models. However, for a few
+        // NOTE simple use cases, a model would be overkill.
+
+        if (this.active()) {
             var target = finalVy.findEventOperator(event);
             var operator = target.dataset.bind || target.getAttribute("data-bind");
 
@@ -498,15 +502,43 @@ class Vy {
         target.removeEventListener(eventType, this.eventHandler);
     }
 
+    /**
+     * dispatch an internal event to signal other app components.
+     *
+     * dispatchEvent() allows to have fire and forget code in a view. This
+     * is very useful, if the view needs to signal a change in the UI to
+     * several components in an app.
+     */
     dispatchEvent(eventType, data=null) {
         this.app.dispatchEvent(eventType, data);
+    }
+
+    /**
+     * use the models function to access the app's models for setting or
+     * retrieving data for the views.
+     *
+     * this property is read only and one must not install models from an
+     * app's view.
+     */
+    get models() {
+        return this.app.models;
     }
 }
 
 /**
  * @class ApModel
+ *
+ * Models are core for handling data in an app.
+ *
+ * The ApModel supports event handling for asynchroneous access to models
+ * throughout the app.
  */
  class ApModel {
+     /**
+      * the central callback function for responding to events.
+      *
+      * this function will trigger the correct method of a model delegate.
+      */
      handleEvent(event) {
          if (typeof this[event.type] === "function"){
              this[event.type](event);
@@ -531,14 +563,35 @@ class Vy {
          }
      }
 
+     /**
+      * override this function for hooking a model events.
+      * Normally, one would call the registerEventList() function with the
+      * list of events the model should respond to.
+      */
      registerEvents() {}
 
+     /**
+      * unregisters all events of the model.
+      *
+      * This is normally triggered by Ap when an overall app reset has been
+      * triggered.
+      */
      resetEvents() {
          if (this.eventList && this.eventList.length && this.eventHandler) {
              this.eventList.map(e => document.removeEventListener(e, this.eventHandler));
          }
      }
 
+     /**
+      * dispatch an internal event to signal other app components.
+      *
+      * This is the opposite to registerEventList(). This will signal one event
+      * to the listening app components.
+      *
+      * dispatchEvent() allows to have fire and forget code in a model. This
+      * is very useful, if the model performs long running actions (like
+      * network access) and needs to signal to the rest of the app when ready.
+      */
      dispatchEvent(eventType, data) {
          this.app.dispatchEvent(eventType, data);
      }
@@ -604,20 +657,24 @@ class Ap {
      * This method can get used at anytime. It does not alter the document state
      * but it will reinstatiate all view delegates. So if views have a
      * persistant state between displays, these states will be lost.
+     *
+     * This function is also used if ApVy is in deferred by running in the
+     * page header.
      */
     resetApp() {
         Object.keys(this.models).map(m => this.models[m].resetEvents());
+        Object.keys(this.views).map(v => this.views[v].resetEvents());
+
         this.models = {};
+        this.views = {};
+
         // first reset the models;
         this.initModels();
-        // find views
 
-        Object.keys(this.views).map(v => this.views[v].resetEvents());
-        this.views = {};
-        // find views
         coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
 
         this.appLoaded = true;
+
         // remove all event listeners, so subsequent load events will not reset
         // the app.
         document.removeEventListener("load", this.loadHandler);
@@ -627,7 +684,9 @@ class Ap {
     }
 
     initModels() {
-        Object.keys(this.modelDelegates).map(m => this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]));
+        Object.keys(this.modelDelegates).map(m => {
+            this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]); this.models[modelClass.name].registerEvents();
+        });
     }
 
     /**
@@ -642,7 +701,6 @@ class Ap {
      * @param {DOMElement} target
      */
     registerView(target) {
-
         let vl = target.dataset.view.split(" ");
         let viewid = target.id;
         if (vl) {
@@ -674,6 +732,10 @@ class Ap {
         }
     }
 
+    /**
+     * registers model delegates with the app.
+     * This would be called after a model class declaration.
+     */
     addModel(modelClass) {
         if (typeof modelClass === "function") {
             if (!this.modelDelegates[modelClass.name]) {
@@ -689,7 +751,11 @@ class Ap {
         }
     }
 
-    addView(viewclass) {
+    /**
+     * registers view delegates with the app.
+     * This would be called after a view class declaration.
+     */
+     addView(viewclass) {
         if (typeof viewclass === "function") {
             if (!this.viewDelegates[viewclass.name]) {
                 this.viewDelegates[viewclass.name] = viewclass; // remember for reset
