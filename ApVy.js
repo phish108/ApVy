@@ -136,43 +136,7 @@ class Vy {
      * toggle uses the data-toggle attribute and expands as bootstrap 4 does.
      * Toggle will always close all tabpanels under this view.
      */
-    toggle(hrefTarget, event = null) {
-
-        let target = hrefTarget.getAttribute("aria-controls");
-
-        if (!target && hrefTarget.hasAttribute("href")) {
-            target = hrefTarget.getAttribute("href").substr(1);
-        }
-
-        if (this.active() &&
-            target &&
-            target.length) {
-
-            if (event) {
-                event.preventDefault();
-            }
-
-            let parent = hrefTarget.parentNode;
-            while (parent &&
-                   !parent.isSameNode(this.target) &&
-                   parent.getAttribute("role") !== "tablist") {
-                parent = parent.parentNode;
-            }
-
-            // now get all tabs in the tablist and hide their panels
-            this.selectSubList(parent, "[role=tab]").map(e => this.__hideTabControl(e));
-            this.showId(target);
-        }
-    }
-
-    __hideTabControl(element) {
-        let target = element.getAttribute("aria-controls");
-
-        if (!target && element.hasAttribute("href")) {
-            target = element.getAttribute("href").substr(1);
-        }
-        this.hideId(target);
-    }
+    toggle(hrefTarget, event = null) {}
 
     /**
      * hides all descendents with the provided class
@@ -376,7 +340,7 @@ class Vy {
             var operator = target.dataset.bind || target.getAttribute("data-bind");
 
             if (target.dataset.toggle || target.getAttribute("data-toggle")) {
-                operator = "toggle";
+                operator = target.dataset.toggle || target.getAttribute("data-toggle");
             }
 
             if (target &&
@@ -683,7 +647,9 @@ class Ap {
         this.viewClasses = {};
         this.viewDelegates = {};
         this.modelDelegates = {};
+
         this.models = {};
+        this.views = {};
 
         this.loadHandler = () => this.resetApp();
 
@@ -762,6 +728,7 @@ class Ap {
             if (!viewid) {
                 target.id = viewid = vl[vl.length -1];
             }
+
             vl.map(v => this.viewClasses[v] = viewid);
         }
 
@@ -816,7 +783,7 @@ class Ap {
                 this.viewDelegates[viewclass.name] = viewclass; // remember for resets
 
                 if (this.appLoaded) {
-                    let viewid = this.viewClasses[viewclass.name];
+                    let viewid = `#${this.viewClasses[viewclass.name]}`;
                     if (viewid && this.views[viewid]) {
                         // clear the view's events
                         this.views[viewid].resetEvents();
