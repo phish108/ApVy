@@ -411,6 +411,9 @@ class Vy {
      * During the application initialization this method hooks the handleEvent()
      * method to all DOM Elements of the application view that have
      * data-events attributes defined.
+     *
+     * A delegate that implements registerEvents() MUST implement resetEvents(),
+     * as well.
      */
     registerEvents() {
         if (!this.eventHandler) {
