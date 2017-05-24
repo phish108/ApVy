@@ -370,9 +370,6 @@ class Vy {
         const finalVy = ApVy.views[this.targetid];
 
         // ensure that we are running
-        // FIXME: handle state changes from other components while inactive?
-        // NOTE normally this is unwanted, because of models. However, for a few
-        // NOTE simple use cases, a model would be overkill.
 
         if (this.active()) {
             var target = finalVy.findEventOperator(event);
@@ -389,11 +386,22 @@ class Vy {
                 // we have a special event operator
                 finalVy[operator](target, event);
             }
-            else if (typeof finalVy[event.type] === "function"){
+            else if (typeof finalVy[event.type] === "function") {
                 finalVy[event.type]((target ? target : finalVy.target), event);
             }
             // end event bubbling here (needed for subviews)
             event.stopPropagation();
+        }
+        else  if (typeof finalVy[event.type] === "function" &&
+                  finalVy.always &&
+                  finalVy.always.indexOf(event.type) >= 0) {
+          // handle state changes from other components while inactive?
+          // NOTE normally this is unwanted, because of models. However, for a few
+          // NOTE simple use cases, a model would be overkill.
+          // the event handler will get called if the event has been registered
+          // to the view's always array. The view MUST create this array it
+          // it wants to use it.
+            finalVy[event.type](finalVy.target, event);
         }
     }
 
@@ -758,12 +766,21 @@ class Ap {
      addView(viewclass) {
         if (typeof viewclass === "function") {
             if (!this.viewDelegates[viewclass.name]) {
-                this.viewDelegates[viewclass.name] = viewclass; // remember for reset
+                this.viewDelegates[viewclass.name] = viewclass; // remember for resets
 
                 if (this.appLoaded) {
                     let viewid = this.viewClasses[viewclass.name];
                     if (viewid && this.views[viewid]) {
+                        // clear the view's events
+                        this.views[viewid].resetEvents();
+                        // create a new delegate proxy
                         this.views[viewid] = new DelegateProxy(this.views[viewid], viewclass);
+                        // allow all view delegates to register their events.
+                        //
+                        // normally, one would register the events in the UI,
+                        // for this is not always favorable for understanding
+                        // the UI logic
+                        this.views[viewid].registerEvents();
                     }
                 }
             }
