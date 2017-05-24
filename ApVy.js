@@ -567,10 +567,10 @@ class Vy {
      * that a delegate registered in a separate registerEvents() implementation.
      * This typically affects only Model-View-Interactions.
      *
-     * An app can also use registerEvent() and clearEvent() calls for
+     * A view can also use registerEvent() and clearEvent() calls for
      * temporarily waiting for external signals.
      *
-     * @param {String} eventType - the event the view captures.
+     * @param {String} eventType - the event to be cleared.
      */
     clearEvent(eventType) {
         this.__clearEventOnTarget(this.target, eventType);
