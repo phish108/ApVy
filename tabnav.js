@@ -34,7 +34,6 @@ class tabnav {
 
         if (target &&
             target.length) {
-
             if (event) {
                 event.preventDefault();
             }
@@ -47,7 +46,7 @@ class tabnav {
             }
 
             // now get all tabs in the tablist and hide their panels
-            this.selectSubList(parent, "[role=tab]").map(e => this.__hideTabControl(e));
+            this.selectSubList(parent, "[role=tab]").map(e => this.hideTabControl(e));
             this.showId(target);
             // add active class to element
             if (!hrefTarget.classList.contains("active")) {
@@ -56,12 +55,13 @@ class tabnav {
         }
     }
 
-    __hideTabControl(element) {
+    hideTabControl(element) {
         let target = element.getAttribute("aria-controls");
 
         if (!target && element.hasAttribute("href")) {
             target = element.getAttribute("href").substr(1);
         }
+
         this.hideId(target);
         // remove active class from element
         if (element.classList.contains("active")) {
