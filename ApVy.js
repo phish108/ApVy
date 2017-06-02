@@ -152,7 +152,7 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).map(e => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector.join(".")).forEach((e) => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -164,7 +164,7 @@ class Vy {
     hideRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).map(e => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector).forEach((e) => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -196,7 +196,9 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).map(e => e.removeAttribute("hidden"));
+            this.selectSubList(this.target, selector.join(".")).forEach(
+                (e) => e.removeAttribute("hidden")
+            );
         }
     }
 
@@ -208,7 +210,9 @@ class Vy {
     showRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).map(e => e.removeAttribute("hidden"));
+            this.selectSubList(this.target, selector).forEach(
+                (e) => e.removeAttribute("hidden")
+            );
         }
     }
 
@@ -299,8 +303,8 @@ class Vy {
         let targets = this.eventDeepPath(event);
 
         let result = targets.find(
-            t => (t.dataset && (t.dataset.bind || t.getAttribute("data-bind") ||
-                                t.dataset.toggle || t.getAttribute("data-toggle")))
+            (t) => (t.dataset && (t.dataset.bind || t.getAttribute("data-bind") ||
+                                  t.dataset.toggle || t.getAttribute("data-toggle")))
         );
 
         return result ? result : event.currentTarget;
@@ -381,7 +385,7 @@ class Vy {
      */
     registerEvents() {
         if (!this.eventHandler) {
-            this.eventHandler = e => this.handleEvent(e);
+            this.eventHandler = (e) => this.handleEvent(e);
         }
 
         if (this.target &&
@@ -390,8 +394,8 @@ class Vy {
 
             // first register all Events on self
             let events = this.target.dataset.event.split(" ");
-            events.map(
-                evt => this.__registerEventOnTarget(this.target, evt)
+            events.forEach(
+                (evt) => this.__registerEventOnTarget(this.target, evt)
             );
 
             // then register element specific events unless there are subviews
@@ -399,8 +403,8 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-event]');
 
-                eventTargets.map(et => et.dataset.event.split(" ").map(
-                    evt => this.__registerEventOnTarget(et, evt)
+                eventTargets.forEach((et) => et.dataset.event.split(" ").forEach(
+                    (evt) => this.__registerEventOnTarget(et, evt)
                 ));
             }
         }
@@ -413,8 +417,8 @@ class Vy {
 
             // first register all Events on self
             let events = this.target.dataset.event.split(" ");
-            events.map(
-                evt => this.__clearEventOnTarget(this.target, evt)
+            events.forEach(
+                (evt) => this.__clearEventOnTarget(this.target, evt)
             );
 
             // then register element specific events unless there are subviews
@@ -422,9 +426,11 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-event]');
 
-                eventTargets.map(et => et.dataset.event.split(" ").map(
-                    evt => this.__clearEventOnTarget(et, evt)
-                ));
+                eventTargets.forEach(
+                    (et) => et.dataset.event.split(" ").forEach(
+                        (evt) => this.__clearEventOnTarget(et, evt)
+                    )
+                );
             }
         }
     }
@@ -570,14 +576,14 @@ class Vy {
       */
      registerEventList(eventList) {
          if (!this.eventHandler) {
-             this.eventHandler = e => this.handleEvent(e);
+             this.eventHandler = (e) => this.handleEvent(e);
          }
          if (Array.isArray(eventList)) {
              if (!this.eventList) {
                  this.eventList = [];
              }
 
-             eventList.map(evt => document.addEventListener(evt, this.eventHandler));
+             eventList.forEach((evt) => document.addEventListener(evt, this.eventHandler));
              this.eventList = this.eventList.concat(eventList);
          }
      }
@@ -597,7 +603,7 @@ class Vy {
       */
      resetEvents() {
          if (this.eventList && this.eventList.length && this.eventHandler) {
-             this.eventList.map(e => document.removeEventListener(e, this.eventHandler));
+             this.eventList.forEach((e) => document.removeEventListener(e, this.eventHandler));
          }
      }
 
@@ -683,8 +689,8 @@ class Ap {
      * page header.
      */
     resetApp() {
-        Object.keys(this.models).map(m => this.models[m].resetEvents());
-        Object.keys(this.views).map(v => this.views[v].resetEvents());
+        Object.keys(this.models).forEach((m) => this.models[m].resetEvents());
+        Object.keys(this.views).forEach((v) => this.views[v].resetEvents());
 
         this.models = {};
         this.views = {};
@@ -697,7 +703,7 @@ class Ap {
         // first reset the models;
         this.initModels();
 
-        coreView.selectList('[data-view][role=group]').map(t => this.registerView(t));
+        coreView.selectList('[data-view][role=group]').forEach((t) => this.registerView(t));
 
         this.appLoaded = true;
 
@@ -710,7 +716,7 @@ class Ap {
     }
 
     initModels() {
-        Object.keys(this.modelDelegates).map(m => {
+        Object.keys(this.modelDelegates).forEach((m) => {
             this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]); this.models[modelClass.name].registerEvents();
         });
     }
@@ -737,7 +743,7 @@ class Ap {
             viewid = `#${viewid}`;
             this.viewDelegates[viewid] = vl;
 
-            vl.map((v) => {
+            vl.forEach((v) => {
                 if (this.delegateViews[v]) {
                     this.delegateViews[v].push(viewid)
                 }
@@ -771,7 +777,7 @@ class Ap {
         };
 
         if (this.viewDelegates[viewid] && this.viewDelegates[viewid].length) {
-            this.viewDelegates[viewid].map((v) => {
+            this.viewDelegates[viewid].forEach((v) => {
                 if (this.viewClasses[v]) {
                     dv = new DelegateProxy(dv, this.viewClasses[v]);
                 }
@@ -864,14 +870,16 @@ class Ap {
             viewlist = coreView.selectList('[data-view][role=group]:not([hidden])');
         }
 
-        viewlist.map(t => this.closeView(`#${t.id}`));
+        viewlist.forEach((t) => this.closeView(`#${t.id}`));
     }
 
     /**
      * asks all active application views to refresh (redraw) their data
      */
     refresh() {
-        coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.refreshView(`#${t.id}`));
+        coreView.selectList('[data-view][role=group]:not([hidden])').forEach(
+            (t) => this.refreshView(`#${t.id}`)
+        );
     }
 
     /**
@@ -879,7 +887,9 @@ class Ap {
      * information
      */
     update() {
-        coreView.selectList('[data-view][role=group]:not([hidden])').map(t => this.updateView(`#${t.id}`));
+        coreView.selectList('[data-view][role=group]:not([hidden])').forEach(
+            (t) => this.updateView(`#${t.id}`)
+        );
     }
 
     /**
@@ -928,7 +938,7 @@ class Ap {
      * @returns {ArrayOfDOMElements}
      */
     activeViews() {
-        return coreView.selectList('[data-view][role=group]:not([hidden])').map(t => `#${t.id}`);
+        return coreView.selectList('[data-view][role=group]:not([hidden])').map((t) => `#${t.id}`);
     }
 
     /**
@@ -945,7 +955,7 @@ class Ap {
         else {
             viewlist = coreView.selectList('[data-view][role=group]');
         }
-        return viewlist.map(t => `#${t.id}`);
+        return viewlist.map((t) => `#${t.id}`);
     }
 
     /**
@@ -978,9 +988,11 @@ class Ap {
         }
 
         event = new CustomEvent(eventType, opts);
-        coreView.selectList('[data-view][role=group]').map(t => {
-            t.dispatchEvent(event);
-        });
+        coreView
+            .selectList('[data-view][role=group]')
+            .forEach(
+                (t) => t.dispatchEvent(event)
+            );
         document.dispatchEvent(event);
     }
 }

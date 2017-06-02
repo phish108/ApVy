@@ -42,11 +42,14 @@ class tabnav {
             while (parent &&
                    !parent.isSameNode(this.target) &&
                    parent.getAttribute("role") !== "tablist") {
+
                 parent = parent.parentNode;
             }
 
             // now get all tabs in the tablist and hide their panels
-            this.selectSubList(parent, "[role=tab]").map(e => this.hideTabControl(e));
+            this.selectSubList(parent, "[role=tab]").forEach(
+                (e) => this.hideTabControl(e)
+            );
             this.showId(target);
             // add active class to element
             if (!hrefTarget.classList.contains("active")) {
