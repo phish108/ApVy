@@ -643,9 +643,9 @@ class Ap {
      * writing any code.
      */
     constructor() {
-        // find and init models
+        // viewClasses keeps references between delegates and views
         this.viewClasses = {};
-        this.viewDelegates = {};
+        // modelDelegates keeps the model delegates
         this.modelDelegates = {};
 
         this.models = {};
@@ -689,6 +689,11 @@ class Ap {
         this.models = {};
         this.views = {};
 
+        this.delegateViews = {};
+        this.viewDelegates = {};
+
+        this.viewData = {};
+
         // first reset the models;
         this.initModels();
 
@@ -729,29 +734,54 @@ class Ap {
                 target.id = viewid = vl[vl.length -1];
             }
 
-            vl.map(v => this.viewClasses[v] = viewid);
+            viewid = `#${viewid}`;
+            this.viewDelegates[viewid] = vl;
+
+            vl.map((v) => {
+                if (this.delegateViews[v]) {
+                    this.delegateViews[v].push(viewid)
+                }
+                else {
+                    this.delegateViews[v] = [viewid];
+                }
+            });
+        }
+        else if (viewid) {
+            `#${viewid}`;
         }
 
         if (viewid) {
-            viewid = `#${viewid}`;
-
-            if (!this.views[viewid]) {
-                const dv = {
-                    target: target,
-                    targetid: viewid,
-                    app: this
-                };
-
-                vl.map(v => {
-                    if (this.viewDelegates[v]) {
-                        dv = new DelegateProxy(dv, this.viewDelegates[v]);
-                    }
-                });
-
-                this.views[viewid] = new DelegateProxy(coreView, dv);
-                this.views[viewid].registerEvents();
-            }
+            // we don't install a delegate for fake views that have no
+            // DOM id and no final view class
+            this.installDelegate(viewid, target)
         }
+    }
+
+    installDelegate(viewid, target) {
+        if (!this.viewData[viewid]) {
+            // writable data, that is kept for resets.
+            this.viewData[viewid] = {};
+        }
+
+        // read only data.
+        let dv = {
+            target: target,
+            targetid: viewid,
+            app: this
+        };
+
+        if (this.viewDelegates[viewid] && this.viewDelegates[viewid].length) {
+            this.viewDelegates[viewid].map((v) => {
+                if (this.viewClasses[v]) {
+                    dv = new DelegateProxy(dv, this.viewClasses[v]);
+                }
+            });
+        }
+
+        dv = new DelegateProxy(dv, this.viewData[viewid]);
+        this.views[viewid] = new DelegateProxy(coreView, dv);
+
+        this.views[viewid].registerEvents();
     }
 
     /**
@@ -778,25 +808,17 @@ class Ap {
      * This would be called after a view class declaration.
      */
      addView(viewclass) {
-        if (typeof viewclass === "function") {
-            if (!this.viewDelegates[viewclass.name]) {
-                this.viewDelegates[viewclass.name] = viewclass; // remember for resets
+        if (typeof viewclass === "function" && !this.viewClasses[viewclass.name]) {
+            this.viewClasses[viewclass.name] = new viewclass(); // remember ONE instance for resets
 
-                if (this.appLoaded) {
-                    let viewid = `#${this.viewClasses[viewclass.name]}`;
+            if (this.appLoaded && this.delegateViews[viewclass.name] && this.delegateViews[viewclass.name].length) {
+                this.delegateViews[viewclass.name].forEach((viewid) => {
                     if (viewid && this.views[viewid]) {
                         // clear the view's events
                         this.views[viewid].resetEvents();
-                        // create a new delegate proxy
-                        this.views[viewid] = new DelegateProxy(this.views[viewid], viewclass);
-                        // allow all view delegates to register their events.
-                        //
-                        // normally, one would register the events in the UI,
-                        // for this is not always favorable for understanding
-                        // the UI logic
-                        this.views[viewid].registerEvents();
+                        this.installDelegate(viewid, this.views[viewid].target);
                     }
-                }
+                });
             }
         }
     }
