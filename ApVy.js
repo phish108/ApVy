@@ -548,6 +548,51 @@ class Vy {
             delete this.always[eventType];
         }
     }
+
+    /**
+     * finds a parent of @param {DOMElement} hrefTarget with a given set of
+     * attribute criteria.
+     *
+     * @param {Object} opts - accepts a key value pair, where the key is an
+     * attribute name and its value is the exact matching value for the
+     * attribute.
+     *
+     * @returns {DOMElement} - returns the matchon parent element
+     */
+    findParentNode(hrefTarget, opts = {}) {
+        let parent = hrefTarget.parentNode;
+        while (parent &&
+               !parent.isSameNode(this.target) &&
+               !this.hasAttributeList(parent, opts)) {
+
+            parent = parent.parentNode;
+        }
+
+        return parent;
+    }
+
+    /**
+     * checks if an @param {DOMElement} element has the provided
+     * attribute-value pairs set.
+     *
+     * @param {Object} objAttr - ccepts a key value pair, where the key is an
+     * attribute name and its value is the exact matching value for the
+     * attribute.
+     *
+     * @returns {Boolean} - true, if the provided attributes are accordingly
+     * set, or false if not.
+     */
+    hasAttributeList(element, objAttr) {
+        return Object.keys(objAttr)
+            .map((a) => element.getAttribute(a) === objAttr[a])
+            .reduce((acc, v) => acc && v, true);
+    }
+
+    stopEvent(event) {
+        if (event) {
+            event.preventDefault();
+        }
+    }
 }
 
 /**

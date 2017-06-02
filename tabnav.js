@@ -26,30 +26,19 @@
 
 class tabnav {
     tab(hrefTarget, event = null) {
-        let target = hrefTarget.getAttribute("aria-controls");
+        let target = hrefTarget.getAttribute("href");
+        target = hrefTarget.getAttribute("aria-controls") || target.substr(1);
 
-        if (!target && hrefTarget.hasAttribute("href")) {
-            target = hrefTarget.getAttribute("href").substr(1);
-        }
+        if (target && target.length) {
+            this.stopEvent(event);
 
-        if (target &&
-            target.length) {
-            if (event) {
-                event.preventDefault();
-            }
-
-            let parent = hrefTarget.parentNode;
-            while (parent &&
-                   !parent.isSameNode(this.target) &&
-                   parent.getAttribute("role") !== "tablist") {
-
-                parent = parent.parentNode;
-            }
+            const parent = this.findParentNode(hrefTarget, {"role": "tablist"});
 
             // now get all tabs in the tablist and hide their panels
             this.selectSubList(parent, "[role=tab]").map(
                 (e) => this.hideTabControl(e)
             );
+            
             this.showId(target);
             // add active class to element
             if (!hrefTarget.classList.contains("active")) {
@@ -59,11 +48,8 @@ class tabnav {
     }
 
     hideTabControl(element) {
-        let target = element.getAttribute("aria-controls");
-
-        if (!target && element.hasAttribute("href")) {
-            target = element.getAttribute("href").substr(1);
-        }
+        let target = element.getAttribute("href") || "";
+        target = element.getAttribute("aria-controls") || target.substr(1);
 
         this.hideId(target);
         // remove active class from element
