@@ -152,7 +152,7 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).forEach((e) => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector.join(".")).map((e) => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -164,7 +164,7 @@ class Vy {
     hideRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).forEach((e) => e.setAttribute("hidden", "hidden"));
+            this.selectSubList(this.target, selector).map((e) => e.setAttribute("hidden", "hidden"));
         }
     }
 
@@ -196,7 +196,7 @@ class Vy {
         if (this.target && cssClass && cssClass.length) {
             let selector = cssClass.split(" ");
             selector.unshift("");
-            this.selectSubList(this.target, selector.join(".")).forEach(
+            this.selectSubList(this.target, selector.join(".")).map(
                 (e) => e.removeAttribute("hidden")
             );
         }
@@ -210,7 +210,7 @@ class Vy {
     showRole(ariaRole) {
         if (this.target && ariaRole && ariaRole.length) {
             let selector = `[role=${ariaRole}]`;
-            this.selectSubList(this.target, selector).forEach(
+            this.selectSubList(this.target, selector).map(
                 (e) => e.removeAttribute("hidden")
             );
         }
@@ -394,7 +394,7 @@ class Vy {
 
             // first register all Events on self
             let events = this.target.dataset.event.split(" ");
-            events.forEach(
+            events.map(
                 (evt) => this.__registerEventOnTarget(this.target, evt)
             );
 
@@ -403,7 +403,7 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-event]');
 
-                eventTargets.forEach((et) => et.dataset.event.split(" ").forEach(
+                eventTargets.map((et) => et.dataset.event.split(" ").map(
                     (evt) => this.__registerEventOnTarget(et, evt)
                 ));
             }
@@ -417,7 +417,7 @@ class Vy {
 
             // first register all Events on self
             let events = this.target.dataset.event.split(" ");
-            events.forEach(
+            events.map(
                 (evt) => this.__clearEventOnTarget(this.target, evt)
             );
 
@@ -426,8 +426,8 @@ class Vy {
             if (!this.selectSubList(this.target, '[data-view][role=group]').length) {
                 let eventTargets = this.selectSubList(this.target,'[data-event]');
 
-                eventTargets.forEach(
-                    (et) => et.dataset.event.split(" ").forEach(
+                eventTargets.map(
+                    (et) => et.dataset.event.split(" ").map(
                         (evt) => this.__clearEventOnTarget(et, evt)
                     )
                 );
@@ -583,7 +583,7 @@ class Vy {
                  this.eventList = [];
              }
 
-             eventList.forEach((evt) => document.addEventListener(evt, this.eventHandler));
+             eventList.map((evt) => document.addEventListener(evt, this.eventHandler));
              this.eventList = this.eventList.concat(eventList);
          }
      }
@@ -603,7 +603,7 @@ class Vy {
       */
      resetEvents() {
          if (this.eventList && this.eventList.length && this.eventHandler) {
-             this.eventList.forEach((e) => document.removeEventListener(e, this.eventHandler));
+             this.eventList.map((e) => document.removeEventListener(e, this.eventHandler));
          }
      }
 
@@ -689,8 +689,8 @@ class Ap {
      * page header.
      */
     resetApp() {
-        Object.keys(this.models).forEach((m) => this.models[m].resetEvents());
-        Object.keys(this.views).forEach((v) => this.views[v].resetEvents());
+        Object.keys(this.models).map((m) => this.models[m].resetEvents());
+        Object.keys(this.views).map((v) => this.views[v].resetEvents());
 
         this.models = {};
         this.views = {};
@@ -703,7 +703,7 @@ class Ap {
         // first reset the models;
         this.initModels();
 
-        coreView.selectList('[data-view][role=group]').forEach((t) => this.registerView(t));
+        coreView.selectList('[data-view][role=group]').map((t) => this.registerView(t));
 
         this.appLoaded = true;
 
@@ -716,7 +716,7 @@ class Ap {
     }
 
     initModels() {
-        Object.keys(this.modelDelegates).forEach((m) => {
+        Object.keys(this.modelDelegates).map((m) => {
             this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]); this.models[modelClass.name].registerEvents();
         });
     }
@@ -743,7 +743,7 @@ class Ap {
             viewid = `#${viewid}`;
             this.viewDelegates[viewid] = vl;
 
-            vl.forEach((v) => {
+            vl.map((v) => {
                 if (this.delegateViews[v]) {
                     this.delegateViews[v].push(viewid)
                 }
@@ -777,7 +777,7 @@ class Ap {
         };
 
         if (this.viewDelegates[viewid] && this.viewDelegates[viewid].length) {
-            this.viewDelegates[viewid].forEach((v) => {
+            this.viewDelegates[viewid].map((v) => {
                 if (this.viewClasses[v]) {
                     dv = new DelegateProxy(dv, this.viewClasses[v]);
                 }
@@ -818,7 +818,7 @@ class Ap {
             this.viewClasses[viewclass.name] = new viewclass(); // remember ONE instance for resets
 
             if (this.appLoaded && this.delegateViews[viewclass.name] && this.delegateViews[viewclass.name].length) {
-                this.delegateViews[viewclass.name].forEach((viewid) => {
+                this.delegateViews[viewclass.name].map((viewid) => {
                     if (viewid && this.views[viewid]) {
                         // clear the view's events
                         this.views[viewid].resetEvents();
@@ -870,14 +870,14 @@ class Ap {
             viewlist = coreView.selectList('[data-view][role=group]:not([hidden])');
         }
 
-        viewlist.forEach((t) => this.closeView(`#${t.id}`));
+        viewlist.map((t) => this.closeView(`#${t.id}`));
     }
 
     /**
      * asks all active application views to refresh (redraw) their data
      */
     refresh() {
-        coreView.selectList('[data-view][role=group]:not([hidden])').forEach(
+        coreView.selectList('[data-view][role=group]:not([hidden])').map(
             (t) => this.refreshView(`#${t.id}`)
         );
     }
@@ -887,7 +887,7 @@ class Ap {
      * information
      */
     update() {
-        coreView.selectList('[data-view][role=group]:not([hidden])').forEach(
+        coreView.selectList('[data-view][role=group]:not([hidden])').map(
             (t) => this.updateView(`#${t.id}`)
         );
     }
@@ -990,7 +990,7 @@ class Ap {
         event = new CustomEvent(eventType, opts);
         coreView
             .selectList('[data-view][role=group]')
-            .forEach(
+            .map(
                 (t) => t.dispatchEvent(event)
             );
         document.dispatchEvent(event);

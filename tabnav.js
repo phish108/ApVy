@@ -47,7 +47,7 @@ class tabnav {
             }
 
             // now get all tabs in the tablist and hide their panels
-            this.selectSubList(parent, "[role=tab]").forEach(
+            this.selectSubList(parent, "[role=tab]").map(
                 (e) => this.hideTabControl(e)
             );
             this.showId(target);
