@@ -35,9 +35,14 @@ function DelegateProxy(operator, delegate) {
     // contexts.
     //
     // if we get a function as delegate we want to instantiate it as an object.
+    if (typeof operator === "function") {
+        operator = new operator();
+    }
     if (typeof delegate === "function") {
         delegate = new delegate();
     }
+
+    const proxy = {};
 
     return new Proxy(operator, {
         // our new proxy is a function, so we want to avoid reinstantiation
@@ -57,6 +62,12 @@ function DelegateProxy(operator, delegate) {
         },
 
         get: function(o,p) {
+            if (p === "delegate") {
+                return function chainDelegate(proxyObject) {
+                    return DelegateProxy(this, proxyObject);
+                };
+            }
+            
             // NOTE: You cannot override the operator functions.
             // This is because delegates are called, whenever the operator
             // has no idea what to do.
@@ -68,15 +79,20 @@ function DelegateProxy(operator, delegate) {
                 typeof delegate[p] === "function") {
                     // arrow operators won't work here because this would
                     // point to the handler object of the proxy
-                    return function (...args) {
-                        let result = delegate[p].apply(this, args);
-                        // handle the result ONLY, if the delegate did not return
-                        // anything useful.
-                        if (!result || !result.length) {
-                            result = operator[p].apply(this, args);
-                        }
-                        return result;
-                    };
+                    if (!proxy[p]) {
+                        // avoid creating dummy functions, repeatetively.
+                        proxy[p] = function (...args) {
+                            let result = delegate[p].apply(this, args);
+                                // handle the result ONLY, if the delegate did not return
+                                // anything useful.
+
+                            if (!result || !result.length) {
+                                result = operator[p].apply(this, args);
+                            }
+                            return result;
+                        };
+                    }
+                    return proxy[p];
             }
 
             if (operator[p]) {

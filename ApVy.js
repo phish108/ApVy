@@ -704,7 +704,7 @@ class Ap {
 
         this.loadHandler = () => this.resetApp();
 
-        this.rootModel = new DelegateProxy(new ApModel(), {app: this});
+        this.rootModel = DelegateProxy(ApModel, {app: this});
 
         if (coreView.selectList('[data-view][role=group]').length) {
             // ApVy runs at the end of the page
@@ -762,7 +762,8 @@ class Ap {
 
     initModels() {
         Object.keys(this.modelDelegates).map((m) => {
-            this.models[m] = new DelegateProxy(this.rootModel, this.modelDelegates[m]); this.models[modelClass.name].registerEvents();
+            this.models[m] = this.rootModel.delegate(this.modelDelegates[m]);
+            this.models[modelClass.name].registerEvents();
         });
     }
 
@@ -821,16 +822,17 @@ class Ap {
             app: this
         };
 
+        dv = DelegateProxy(dv, coreView);
+
         if (this.viewDelegates[viewid] && this.viewDelegates[viewid].length) {
             this.viewDelegates[viewid].map((v) => {
                 if (this.viewClasses[v]) {
-                    dv = new DelegateProxy(dv, this.viewClasses[v]);
+                    dv = dv.delegate(this.viewClasses[v]);
                 }
             });
         }
 
-        dv = new DelegateProxy(dv, this.viewData[viewid]);
-        this.views[viewid] = new DelegateProxy(coreView, dv);
+        this.views[viewid] = dv.delegate(this.viewData[viewid]);
 
         this.views[viewid].registerEvents();
     }
@@ -846,7 +848,7 @@ class Ap {
 
                 if (this.appLoaded) {
                     if(!this.models[modelClass.name]) {
-                        this.models[modelClass.name] = new DelegateProxy(this.rootModel, modelClass);
+                        this.models[modelClass.name] = this.rootModel.delegate(modelClass);
                         this.models[modelClass.name].registerEvents();
                     }
                 }
