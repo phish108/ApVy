@@ -517,9 +517,14 @@ class Vy {
      *
      * @param {String} eventType - the event the view wants to capture.
      * @param {Boolean} always - capture the event even if the view is inactive, default = false.
+     * @param {DOMElement} target - provide a target to register the event, default = view root
      */
-    registerEvent(eventType, always=false) {
-        this.__registerEventOnTarget(this.target, eventType);
+    registerEvent(eventType, always=false, target = null) {
+        if (!target) {
+            target = this.target;
+        }
+        
+        this.__registerEventOnTarget(target, eventType);
         if (always) {
             if (!this.always) {
                 this.always = [];
@@ -541,9 +546,13 @@ class Vy {
      * temporarily waiting for external signals.
      *
      * @param {String} eventType - the event to be cleared.
+     * @param {DOMElement} target - optional event target for the event, default: view root
      */
-    clearEvent(eventType) {
-        this.__clearEventOnTarget(this.target, eventType);
+    clearEvent(eventType, target = null) {
+        if (!target) {
+            target = this.target;
+        }
+        this.__clearEventOnTarget(target, eventType);
         if (this.always && this.always.indexOf(eventType) >= 0) {
             delete this.always[eventType];
         }
