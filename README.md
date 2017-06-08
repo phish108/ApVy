@@ -10,17 +10,17 @@ having to implement any code.
 
 ApVy removes a bunch of prerequisites to learn before one can become active.
 
--   Event Callbacks
+-   Event Callbacks and Event Pipelining
 -   Class Inheritance
 -   Package Management
 -   Module Encapsulation
 -   Layout
 
 ApVy has no framework dependencies and does not mess with standard objects.
-Therefore, it works nicely with other frameworks such as jQuery, Bootstrap,
+Therefore, it should work nicely with other frameworks such as jQuery, Bootstrap,
 or D3. Because ApVy does not use any CSS classes, layouting should work with
-your favorite CSS layouting framework. Actually, ApVy does not make any
-assumptions about the UX experience.
+your favorite CSS framework. Actually, ApVy does not make any assumptions about
+the UX experience.
 
 ApVy is written in ES6 and runs on ES6-compliant browsers out of the box.
 These include Chrome 50+, Safari 10+, Firefox 50+, iOS Safari 10+,
