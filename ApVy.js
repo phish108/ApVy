@@ -327,6 +327,10 @@ class Vy {
      * If no operator function is defined on the application view the
      * handleEvent() method will gracefully ignore the event.
      *
+     * Delegates may register operator pipelines they want to inject for
+     * handling specific events.
+     * TODO: Examples for operator pipelines (UI pipelines and class pipelines)
+     *
      * @param {Event} event
      */
     handleEvent(event) {
@@ -362,7 +366,7 @@ class Vy {
             const context = {
                 event,
                 target,
-                stopChain:       () => { processing = false; },
+                stopChain:       () => { processing = false; }, // terminates the pipeline
                 stopPropagation: () => { }, // we stop anyways
                 preventDefault:  () => { event.preventDefault(); }
             };
