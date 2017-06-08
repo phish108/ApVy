@@ -337,39 +337,49 @@ class Vy {
         // finalVy, so our specialised methods will get called, correctly.
         const finalVy = ApVy.views[this.targetid];
 
-        // ensure that we are running
+        if (this.active() || (finalVy.always && finalVy.always.indexOf(eventType) >= 0)) {
+            const target = finalVy.findEventOperator(event);
+            let bindOp = target.dataset.bind || target.getAttribute("data-bind");
+            let toggleOp = target.dataset.toggle || target.getAttribute("data-toggle");
 
-        if (this.active()) {
-            var target = finalVy.findEventOperator(event);
-            var operator = target.dataset.bind || target.getAttribute("data-bind");
-
-            if (target.dataset.toggle || target.getAttribute("data-toggle")) {
-                operator = target.dataset.toggle || target.getAttribute("data-toggle");
+            let operator = [];
+            // class opertors always come first
+            if (this.eventOperators && this.eventOperators[event.type]) {
+                operator = operator.concat(this.eventOperators[event.type]);
+            }
+            if (bindOp) {
+                operator = operator.concat(bindOp.split(" "));
+            }
+            if (toggleOp) {
+                operator = operator.concat(toggleOp.split(" "));
+            }
+            if (!operator.length) {
+                operator.push(event.type);
             }
 
-            if (target &&
-                operator &&
-                typeof finalVy[operator] === "function") {
+            let processing = true;
+            let stop = false;
+            const context = {
+                event,
+                target,
+                stopChain:       () => { processing = false; },
+                stopPropagation: () => { }, // we stop anyways
+                preventDefault:  () => { event.preventDefault(); }
+            };
 
-                // we have a special event operator
-                finalVy[operator](target, event);
+            // now we loop operator list
+            // we stopPropagation only if at least one operator has been executed
+            operator.reduce((acc, op) => {
+                if (processing && typeof finalVy[op] === "function") {
+                    stop = true;
+                    return finalVy[op](acc, context);
+                }
+                return acc;
+            }, target || finalVy.target);
+
+            if (stop) {
+                event.stopPropagation();
             }
-            else if (typeof finalVy[event.type] === "function") {
-                finalVy[event.type]((target ? target : finalVy.target), event);
-            }
-            // end event bubbling here (needed for subviews)
-            event.stopPropagation();
-        }
-        else  if (typeof finalVy[event.type] === "function" &&
-                  finalVy.always &&
-                  finalVy.always.indexOf(event.type) >= 0) {
-          // handle state changes from other components while inactive?
-          // NOTE normally this is unwanted, because of models. However, for a few
-          // NOTE simple use cases, a model would be overkill.
-          // the event handler will get called if the event has been registered
-          // to the view's always array. The view MUST create this array it
-          // it wants to use it.
-            finalVy[event.type](finalVy.target, event);
         }
     }
 
@@ -518,13 +528,25 @@ class Vy {
      * @param {String} eventType - the event the view wants to capture.
      * @param {Boolean} always - capture the event even if the view is inactive, default = false.
      * @param {DOMElement} target - provide a target to register the event, default = view root
+     * @param {MIXED} operators - string or array of strings with method names to handle the event
      */
-    registerEvent(eventType, always=false, target = null) {
+    registerEvent(eventType, always=false, target = null, operators = []) {
         if (!target) {
             target = this.target;
         }
-        
+
         this.__registerEventOnTarget(target, eventType);
+
+        if (typeof operators === "string") {
+            operators = [operators];
+        }
+        if (Array.isArray(operators)) {
+            if (!this.eventOperators) {
+                this.eventOperators = {};
+            }
+            this.eventOperators[eventType] = operators;
+        }
+
         if (always) {
             if (!this.always) {
                 this.always = [];
